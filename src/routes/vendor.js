@@ -180,7 +180,7 @@ router.post("/addItems/:id", verifyVendor, upload.single('img'), async (req, res
 
     const id = req.params.id; // Accessing the id parameter from the URL
     const { itemname, price } = req.body;
-    console.log(req.file)
+    // console.log(req.file)
     try {
         // Find the vendor by ID
         const vendorUser = await vendor.findById(id);

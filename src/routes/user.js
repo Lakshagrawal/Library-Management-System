@@ -93,7 +93,7 @@ router.get("/allItems/:id",verifUser,async(req,res)=>{
     }));
     
     
-    console.log(category)
+    // console.log(category)
     res.render("userAllItems",{items: allItems,category:category})
 })
 
