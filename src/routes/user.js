@@ -37,10 +37,10 @@ router.get("/registration", async(req,res)=>{
 // Done
 // singup
 router.post("/usersignup",async(req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const {email,pass,user} = req.body;
     if(!email || !pass || !user ){
-        console.log("hello")
+        // console.log("hello")
         res.redirect("/user/registration")
     }
     else{
@@ -67,8 +67,7 @@ router.get("/categories/:categ",async(req,res)=>{
     if (!vendordata) {
         return res.status(404).json({ error: 'No Category found' });
     }
-    console.log(vendordata.length)
-    console.log(vendordata)
+    // console.log(vendordata)
     res.render("usercategories",{vendordata:vendordata})
 })
 
@@ -100,7 +99,7 @@ router.get("/allItems/:id",verifUser,async(req,res)=>{
 router.get("/userCart",verifUser,async(req,res)=>{
     const vendorid = req.query.vendorid;
     const itemid = req.query.itemid;
-    console.log(vendorid)
+    // console.log(vendorid)
     try {
         const vendorUser = await vendor.findById(vendorid);
         // console.log(vendorUser)
@@ -154,7 +153,7 @@ router.post("/usersignin",async(req,res)=>{
                 try {
                     // this ==> User   value
                     const token = jwt.sign({_id:usersdb._id},process.env.SECRET_KEY_TOKEN);
-                    console.log("lakshya" , token);
+                    // console.log("lakshya" , token);
                     usersdb.token = token
                     await usersdb.save();
                     res.cookie('usertoken', token);
@@ -188,6 +187,31 @@ router.get("/cart",async(req,res)=>{
     
 })
 
+router.get("/usertransection",async(req,res)=>{
+    res.render("usertransection")
+     
+ })
+
+
+ router.post("/payment",async(req,res)=>{
+    // Process payment...
+
+    // Send response with JavaScript code to clear localStorage
+    const clearLocalStorageScript = `
+        <script>
+            localStorage.clear();
+            // Redirect the user to a success page or perform any other action
+            window.location.href = "/user/successpayment";
+        </script>
+    `;
+    res.send(clearLocalStorageScript);
+     
+ })
+
+ router.get("/successpayment",async(req,res)=>{
+    res.render("successpayment");
+     
+ })
 
 
 
