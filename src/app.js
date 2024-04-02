@@ -37,8 +37,8 @@ const vendor = require("./routes/vendor")
 app.use('/vendor',vendor); 
 const user = require("./routes/user")
 app.use('/user',user);
-// const admin = require("./routes/admin")
-// app.use('/api',auth); 
+const admin = require("./routes/admin")
+app.use('/admin',admin); 
 
 
 // Error handler
