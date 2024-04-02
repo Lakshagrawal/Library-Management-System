@@ -35,6 +35,7 @@
                         <p class="total-price">Total: ${{this.price}}</p>
                         <button class="btn btn-primary add-to-cart">Add to Cart</button>
                     </div>
+                        <small class="card-title" id="itemid">{{this._id}}</small>
                 </div>
             </div>
             {{/each}}
@@ -63,7 +64,7 @@
 
         {{#if Checkout}}
         <div class="container d-flex flex-column my-4">
-            <button type="button" class="btn btn-primary text-center">Proceed to CheckOut</button>
+            <a href="/user/usertransection" class="btn btn-primary text-center">Proceed to Checkout</a>
         </div>
         {{/if}}
     </div>
@@ -86,13 +87,14 @@
                     const productPrice = parseFloat(product.querySelector(".card-text").textContent.replace("Price: $", ""));
                     const quantity = parseInt(product.querySelector(".quantity-dropdown").value);
                     const totalPrice = productPrice * quantity;
-
+                    const itemid = document.getElementById("itemid").textContent;
                     // Create cart item object
                     const cartItem = {
                         name: productName,
                         price: productPrice,
                         quantity: quantity,
-                        total: totalPrice
+                        total: totalPrice,
+                        id:itemid
                     };
 
                     // Retrieve existing cart items from localStorage
