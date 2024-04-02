@@ -69,7 +69,7 @@ router.get("/logout", async (req, res) => {
 
 // singup
 router.post("/vendorsignup", async (req, res) => {
-    // console.log(req.body);
+    console.log(req.body);
     const { email, pass, user, category } = req.body;
     if (!email || !pass || !category || !user) {
         res.redirect("/vendor/registration")
@@ -112,7 +112,7 @@ router.post("/vendorsignin", async (req, res) => {
                 try {
                     // this ==> User   value
                     const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
-                    // console.log("lakshya", token);
+                    console.log("lakshya", token);
                     usersdb.token = token
                     await usersdb.save();
                     res.cookie('vendortoken', token);
