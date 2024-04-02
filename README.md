@@ -32,11 +32,6 @@ SESSION_KEY = anyStringYoulikePutHere
 
 
 
-## Authors
-
-- [@Lakshagrawal](https://github.com/Lakshagrawal)
-
-
 ## Tech Stack
 
 **Client:** HTML, CSS, Javascript, BootStrap, HBS, 
@@ -47,4 +42,9 @@ SESSION_KEY = anyStringYoulikePutHere
 
 
 **Database:** Mongodb (local)
+
+
+## Authors
+
+- [@Lakshagrawal](https://github.com/Lakshagrawal)
 
