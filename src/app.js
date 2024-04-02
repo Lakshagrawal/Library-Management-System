@@ -37,8 +37,8 @@ const vendor = require("./routes/vendor")
 app.use('/vendor',vendor); 
 const user = require("./routes/user")
 app.use('/user',user);
-// const admin = require("./routes/admin")
-// app.use('/api',auth); 
+const admin = require("./routes/admin")
+app.use('/admin',admin); 
 
 
 // Error handler
@@ -49,7 +49,7 @@ app.use((err, req, res, next) => {
 
 try{
     const dbURL =  "mongodb://localhost:27017/bookstore";  
-    console.log(dbURL);
+    // console.log(dbURL);
 
     mongoose.connect(dbURL).then(()=>{
         console.log("db is connected succsesfully");

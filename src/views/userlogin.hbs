@@ -24,48 +24,53 @@
   ================================================== -->
   <script src="/static/js/modernizr.js"></script>
   <script defer src="/static/js/fontawesome/all.min.js"></script>
- 
- 
- </head>
+
+
+</head>
 
 <body id="top">
 
   <!-- preloader
     ================================================== -->
-    <div id="preloader">
-        <div id="loader" class="dots-fade">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
+  <div id="preloader">
+    <div id="loader" class="dots-fade">
+      <div></div>
+      <div></div>
+      <div></div>
     </div>
+  </div>
+  {{#if samepassworderror}}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>User Already Exists</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {{/if}}
 
-    <!-- Header
+
+  <!-- Header
     ================================================== -->
-    <header class="s-header">
+  <header class="s-header">
 
 
-       <nav class="s-header__nav-wrap">
+    <nav class="s-header__nav-wrap">
 
-           <div class="row">
+      <div class="row">
 
-               <ul class="s-header__nav">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/user/registration">Sign Up</a></li>
-                    <li><a href="/user/logOut">Log Out</a></li>
-                    
-                </ul> <!-- end #nav -->
-           </div> 
+        <ul class="s-header__nav">
+          <li><a href="/">Home</a></li>
+          <li><a href="/user/registration">Sign Up</a></li>
 
-        </nav> <!-- end #nav-wrap -->
+        </ul> <!-- end #nav -->
+      </div>
 
-        <a class="header-menu-toggle" href="#0" title="Menu"><span>Menu</span></a>
+    </nav> <!-- end #nav-wrap -->
 
-    </header> <!-- Header End -->
+    <a class="header-menu-toggle" href="#0" title="Menu"><span>Menu</span></a>
 
+  </header> <!-- Header End -->
   <div class="container">
     <form action="/user/usersignin" method="post">
-      <div class="title">Login</div>
+      <div class="title">User Login</div>
       <span class="details">User Name</span>
       <div class="input-box underline">
         <input type="text" placeholder="Enter Your User Id" name="user" class="user" id="user" required>

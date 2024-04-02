@@ -11,23 +11,34 @@
 
 <body>
   <div class="container mt-5">
+    <div class="container d-flex justify-content-between mt-4">
+      <div class="col-lg-2 col-md-4">
+        <a href="/vendor" class="btn btn-primary btn-lg btn-block mb-3">Back</a>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <a href="/vendor/logout" class="btn btn-primary btn-lg btn-block mb-3">Logout</a>
+      </div>
+    </div>
+    <div class="container">
 
-    <form action="/vendor/addItems/{{id}}" method="post" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="itemname" class="form-label">Item Name</label>
-        <input type="text" class="form-control" id="itemname" name="itemname" required>
-      </div>
-      <div class="mb-3">
-        <label for="price" class="form-label">Price</label>
-        <input type="text" class="form-control" id="price" name="price" required>
-      </div>
-      <div class="mb-3">
-        <label for="img" class="form-label">Image</label>
-        <input type="file" class="form-control" id="img" name="img" accept="image/*" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Add Item</button>
-    </form>
+      <h1 class="my-2">Add Item To your Shop</h1>
+      <form action="/vendor/addItems/{{id}}" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="itemname" class="form-label">Item Name</label>
+          <input type="text" class="form-control" id="itemname" name="itemname" required>
+        </div>
+        <div class="mb-3">
+          <label for="price" class="form-label">Price</label>
+          <input type="text" class="form-control" id="price" name="price" required>
+        </div>
+        <div class="mb-3">
+          <label for="img" class="form-label">Image</label>
+          <input type="file" class="form-control" id="img" name="img" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Item</button>
+      </form>
 
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

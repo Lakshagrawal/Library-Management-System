@@ -10,67 +10,72 @@ const jwt = require("jsonwebtoken");
 // use of json file in the router or || app file 
 router.use(express.json());
 router.use(cookieParser())
-const  bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
 router.use(bodyParser.urlencoded({
-    extended:true
+    extended: true
 }))
 
 
 
 // --->  /user
 
-router.get("/", async(req,res)=>{
+router.get("/", async (req, res) => {
     const token = await req.cookies.vendortoken;
-    if(!token){
+    if (!token) {
         res.render("vendorlogin");
     }
-    else{
-        const verifyUser = await jwt.verify(token,process.env.SECRET_KEY_TOKEN) 
-        res.render('vendorhome',{id:verifyUser._id});
+    else {
+        const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
+        res.render('vendorhome', { id: verifyUser._id });
     }
-    
+
 })
 
-router.get("/registration", async(req,res)=>{
-        res.render('vendorsign');
+router.get("/registration", async (req, res) => {
+    res.render('vendorsign');
 })
 
 
-router.get("/allItems/:id",verifyVendor,async(req,res)=>{
+router.get("/allItems/:id", verifyVendor, async (req, res) => {
     const id = req.params.id; // Accessing the id parameter from the URL
-    const vendorUser = await vendor.findOne({ _id: id});
-    if (!vendorUser) {
-        return res.status(404).json({ error: 'Vendor not found' });
+    try {
+        const vendorUser = await vendor.findOne({ _id: id });
+        // console.log(vendorUser)
+        if (!vendorUser) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+        // const allitems = vendorUser.items;
+        // Extract items from the vendor
+        const allItems = vendorUser.items.map(item => ({
+            itemname: item.itemname,
+            price: item.price,
+            img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}` // Convert binary data to base64 data URI
+        }));
+
+        // console.log("Items:", allItems);
+        res.render("vendorAllItems", { items: allItems })
+    } catch (error) {
+        console.log(error)
     }
-    // const allitems = vendorUser.items;
-    // Extract items from the vendor
-    const allItems = vendorUser.items.map(item => ({
-        itemname: item.itemname,
-        price: item.price,
-        img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}` // Convert binary data to base64 data URI
-    }));
-    
-    console.log("Items:", allItems);
-    console.log("hello my name is lakshya" , allItems)
-    res.render("vendorAllItems",{items:allItems})
+
 })
 
 
-router.get("/logout",async(req,res)=>{
-     res.clearCookie("vendortoken");
-     res.redirect('/vendor');
+router.get("/logout", async (req, res) => {
+    res.clearCookie("vendortoken");
+    res.redirect('/vendor');
 })
 
 
 // singup
-router.post("/vendorsignup",async(req,res)=>{
+router.post("/vendorsignup", async (req, res) => {
     console.log(req.body);
-    const {email,pass,user,category} = req.body;
-    if(!email || !pass || !category || !user ){
+    const { email, pass, user, category } = req.body;
+    if (!email || !pass || !category || !user) {
         res.redirect("/vendor/registration")
     }
-    else{
-        try{
+    else {
+        try {
             const newUser = new vendor({
                 email,
                 pass,
@@ -80,7 +85,7 @@ router.post("/vendorsignup",async(req,res)=>{
             await newUser.save();
             return res.redirect('/vendor/')
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(501).send("server error")
         }
@@ -88,26 +93,26 @@ router.post("/vendorsignup",async(req,res)=>{
 })
 
 // login
-router.post("/vendorsignin",async(req,res)=>{
+router.post("/vendorsignin", async (req, res) => {
     // console.log(req.body);
-    const {pass,user} = req.body;
+    const { pass, user } = req.body;
 
-    if(!user || !pass){
+    if (!user || !pass) {
         res.redirect("/vendor")
     }
-    else{
-        try{
-            const {user,pass} =  req.body;
-            const usersdb = await vendor.findOne({user:user});
-            if(!usersdb){
-                return res.status(404).json({error : "Please Enter Correct User and Password", "server": "ok"});
+    else {
+        try {
+            const { user, pass } = req.body;
+            const usersdb = await vendor.findOne({ user: user });
+            if (!usersdb) {
+                return res.status(404).json({ error: "Please Enter Correct User and Password", "server": "ok" });
             }
 
-            if(pass == usersdb.pass){
+            if (pass == usersdb.pass) {
                 try {
                     // this ==> User   value
-                    const token = jwt.sign({_id:usersdb._id},process.env.SECRET_KEY_TOKEN);
-                    console.log("lakshya" , token);
+                    const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
+                    console.log("lakshya", token);
                     usersdb.token = token
                     await usersdb.save();
                     res.cookie('vendortoken', token);
@@ -117,12 +122,12 @@ router.post("/vendorsignin",async(req,res)=>{
                 }
                 return res.redirect("/vendor")
             }
-            else{
+            else {
                 // Incorect user and password
-                return res.status(400).json({error:"Invalid Crediantial" , server: "ok"});
+                return res.status(400).json({ error: "Invalid Crediantial", server: "ok" });
             }
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             return res.status(501).send("server error")
         }
@@ -133,9 +138,29 @@ router.post("/vendorsignin",async(req,res)=>{
 
 
 // Done
-router.get("/addItems/:id",verifyVendor,async(req,res)=>{
+router.get("/addItems/:id", verifyVendor, async (req, res) => {
     const id = req.params.id; // Accessing the id parameter from the URL
-    res.render("vendorAddItems",{id});
+    res.render("vendorAddItems", { id: id });
+})
+
+router.get("/transactions", verifyVendor, async (req, res) => {
+    const token = await req.cookies.vendortoken;
+    const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
+    // console.log(verifyUser)
+    
+    if (!token) {
+        res.render("vendorlogin");
+    }
+    else {
+        try {
+            // Transaction schema define kar na hai 
+            const vendorTransaction = await vendor.find({ _id: verifyUser._id });
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    const id = req.params.id; // Accessing the id parameter from the URL
+    res.render("vendorAddItems");
 })
 
 
@@ -151,8 +176,8 @@ const upload = multer({ storage: storage });
 exports.uploadFile = upload.single('img'); // 'img' is the name attribute of the file input field in the form
 
 
-router.post("/addItems/:id",verifyVendor,upload.single('img'),async(req,res)=>{
-    
+router.post("/addItems/:id", verifyVendor, upload.single('img'), async (req, res) => {
+
     const id = req.params.id; // Accessing the id parameter from the URL
     const { itemname, price } = req.body;
     console.log(req.file)
@@ -193,6 +218,6 @@ router.post("/addItems/:id",verifyVendor,upload.single('img'),async(req,res)=>{
 
 
 
-        
+
 
 module.exports = router;

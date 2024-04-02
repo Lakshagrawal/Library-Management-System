@@ -35,8 +35,30 @@
         display: inline-block;
         margin: 0 auto;
       }
-    </style>
+    .custom-btn {
+        /* Add your custom styles here */
+        background-color: #007bff; /* Blue */
+        color: #fff; /* White text */
+        border: none; /* No border */
+        border-radius: 5px; /* Rounded corners */
+        padding: 10px 20px; /* Padding */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Make it an inline block */
+        transition: background-color 0.3s; /* Smooth transition on hover */
+        margin-bottom: 2rem;
+    }
+
+    .custom-btn:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+</style>
+
+<div class="col-lg-2 col-md-4 my-3">
+    <a href="/user/cart" class="custom-btn">Back</a>
+</div>
+
     <body>
+        
       <div class="card">
       <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
         <i class="checkmark">✓</i>

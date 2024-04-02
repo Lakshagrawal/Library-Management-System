@@ -9,7 +9,18 @@
 </head>
 
 <body>
+    <div class="container d-flex justify-content-between mt-4">
+        <div class="col-lg-2 col-md-4">
+            <a href="/user" class="btn btn-primary btn-lg btn-block mb-3">Back</a>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <a href="/user/logout" class="btn btn-primary btn-lg btn-block mb-3">Logout</a>
+        </div>
+    </div>
+
     <div class="container ">
+
+        <h1 class="text-center">All Cart Items</h1>
         <div class="row text-center">
             {{#each items}}
             <div class="col-md-4">
@@ -35,7 +46,7 @@
                         <p class="total-price">Total: ${{this.price}}</p>
                         <button class="btn btn-primary add-to-cart">Add to Cart</button>
                     </div>
-                        <small class="card-title" id="itemid">{{this._id}}</small>
+                    <small class="card-title" id="itemid">{{this._id}}</small>
                 </div>
             </div>
             {{/each}}
@@ -43,7 +54,7 @@
     </div>
 
     <div class="container mt-4">
-        <h2 class="text-center">Cart</h2>
+        {{!-- <h2 class="text-center">Cart</h2> --}}
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card flex mx-2">
@@ -94,7 +105,7 @@
                         price: productPrice,
                         quantity: quantity,
                         total: totalPrice,
-                        id:itemid
+                        id: itemid
                     };
 
                     // Retrieve existing cart items from localStorage
@@ -118,7 +129,6 @@
 
             // Get the cart items container element
             const cartItemsContainer = document.querySelector(".cart-items");
-
             // Iterate over the retrieved cart items and render them on the page
             cartItems.forEach(item => {
                 const cartItem = document.createElement("div");
@@ -130,6 +140,7 @@
                 <p>Total: $${item.total.toFixed(2)}</p>
                 <button class="btn btn-danger remove-from-cart">Remove</button>
                 <hr>
+
             `;
                 cartItemsContainer.appendChild(cartItem);
             });

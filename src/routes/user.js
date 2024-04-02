@@ -34,7 +34,7 @@ router.get("/registration", async(req,res)=>{
     res.render('usersign');
 })
 
-// Done
+
 // singup
 router.post("/usersignup",async(req,res)=>{
     // console.log(req.body);
@@ -45,6 +45,10 @@ router.post("/usersignup",async(req,res)=>{
     }
     else{
         try{
+            const usersdb = await User.findOne({user:user});
+            if(!usersdb){
+               return res.redirect("/user/",{samepassworderror:true});
+            }
             const newUser = new User({
                 email,
                 pass,
@@ -68,7 +72,7 @@ router.get("/categories/:categ",async(req,res)=>{
         return res.status(404).json({ error: 'No Category found' });
     }
     // console.log(vendordata)
-    res.render("usercategories",{vendordata:vendordata})
+    res.render("usercategories",{vendordata:vendordata,categorie:categorie})
 })
 
 router.get("/allItems/:id",verifUser,async(req,res)=>{
@@ -79,6 +83,7 @@ router.get("/allItems/:id",verifUser,async(req,res)=>{
     }
     // const allitems = vendorUser.items;
     // Extract items from the vendor
+    let category = vendorUser.category;
     const allItems = vendorUser.items.map(item => ({
         itemname: item.itemname,
         price: item.price,
@@ -87,12 +92,9 @@ router.get("/allItems/:id",verifUser,async(req,res)=>{
         data:id
     }));
     
-    // console.log("Items:", allItems);
-    // console.log("hello my name is lakshya" , allItems)
-    // console.log(allItems[0])
-    // console.log(id)
-    let data = id;
-    res.render("userAllItems",{items: allItems})
+    
+    console.log(category)
+    res.render("userAllItems",{items: allItems,category:category})
 })
 
 
@@ -122,7 +124,7 @@ router.get("/userCart",verifUser,async(req,res)=>{
         // console.log(allItems.length)
         
         // res.status(200).json({ items: allItems });
-        return res.render("userCart",{items:allItems})
+        return res.render("userCart",{items:allItems,vendorid:vendorid})
 
     } catch (error) {
         console.error(error);
@@ -189,6 +191,11 @@ router.get("/cart",async(req,res)=>{
 
 router.get("/usertransection",async(req,res)=>{
     res.render("usertransection")
+     
+ })
+ 
+ router.get("/userorderstatus",async(req,res)=>{
+    res.render("userorderstatus");
      
  })
 

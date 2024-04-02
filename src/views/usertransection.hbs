@@ -11,7 +11,10 @@
 
 <body>
     <div class="container mt-4">
-        <h1>Item</h1>
+        <div class="col-lg-2 col-md-4">
+            <a href="/user/cart" class="btn btn-primary btn-lg btn-block mb-3">Back</a>
+        </div>
+        <h1 class="text-center">Payment and Address form </h1>
         <form action="/user/payment" method="post">
             <div class="mb-3">
                 <label for="exampleInputName" class="form-label">Name</label>
@@ -45,7 +48,7 @@
                 <label for="exampleInputState" class="form-label">State</label>
                 <input type="text" class="form-control" id="exampleInputState" name="state">
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary my-2 mb-5">Submit</button>
         </form>
 
     </div>
