@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            {{#each items}}
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="{{this.img}}" class="card-img-top" alt="{{this.itemname}}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{this.itemname}}</h5>
+                        <p class="card-text">Price: ${{this.price}}</p>
+                        <select class="form-select quantity-dropdown">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <!-- Add options for quantity up to 9 -->
+                            <!-- Adjust the maximum quantity as per your requirement -->
+                            <!-- For demonstration purposes, I'm adding options up to 9 -->
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                        <p class="total-price">Total: ${{this.price}}</p>
+                        <button class="btn btn-primary add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <div class="cart-container mt-4">
+        <h2>Cart</h2>
+        <div class="cart-items"></div>
+        <p class="cart-total">Total: $0.00</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const addToCartButtons = document.querySelectorAll(".add-to-cart");
+
+            addToCartButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const product = button.parentElement.parentElement;
+                    const productName = product.querySelector(".card-title").textContent;
+                    const productPrice = parseFloat(product.querySelector(".card-text").textContent.replace("Price: $", ""));
+                    const quantity = parseInt(product.querySelector(".quantity-dropdown").value);
+                    const totalPrice = productPrice * quantity;
+
+                    // Create cart item element
+                    const cartItem = document.createElement("div");
+                    cartItem.classList.add("cart-item");
+                    cartItem.innerHTML = `
+                        <p>${productName}</p>
+                        <p>Quantity: ${quantity}</p>
+                        <p>Total: $${totalPrice.toFixed(2)}</p>
+                        <button class="btn btn-danger remove-from-cart">Remove</button>
+                    `;
+
+                    const cartItemsContainer = document.querySelector(".cart-items");
+                    cartItemsContainer.appendChild(cartItem);
+
+                    // Calculate total price of all items in the cart
+                    const cartTotal = document.querySelector(".cart-total");
+                    const currentTotal = parseFloat(cartTotal.textContent.replace("Total: $", ""));
+                    const newTotal = currentTotal + totalPrice;
+                    cartTotal.textContent = `Total: $${newTotal.toFixed(2)}`;
+                });
+            });
+
+            // Add event listener to remove item from the cart
+            const cartItemsContainer = document.querySelector(".cart-items");
+            cartItemsContainer.addEventListener("click", function(event) {
+                if (event.target.classList.contains("remove-from-cart")) {
+                    const itemToRemove = event.target.parentElement;
+                    const priceToRemove = parseFloat(itemToRemove.querySelector("p:nth-child(3)").textContent.replace("Total: $", ""));
+                    const cartTotal = document.querySelector(".cart-total");
+                    const currentTotal = parseFloat(cartTotal.textContent.replace("Total: $", ""));
+                    const newTotal = currentTotal - priceToRemove;
+                    cartTotal.textContent = `Total: $${newTotal.toFixed(2)}`;
+                    itemToRemove.remove();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

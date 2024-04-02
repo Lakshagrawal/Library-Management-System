@@ -1,0 +1,32 @@
+// Home
+
+- app
+  - controllers
+    - authController.js
+    - maintenanceController.js
+    - reportsController.js
+    - transactionsController.js
+  - models
+    - user.js
+    - report.js
+    - transaction.js
+  - routes
+    - authRoutes.js
+    - maintenanceRoutes.js
+    - reportsRoutes.js
+    - transactionsRoutes.js
+  - views
+    - login.ejs
+    - dashboard.ejs
+    - maintenance.ejs
+    - reports.ejs
+    - transactions.ejs
+- public
+  - css
+    - styles.css
+  - js
+    - script.js
+- config
+  - db.js
+  - auth.js
+- server.js
