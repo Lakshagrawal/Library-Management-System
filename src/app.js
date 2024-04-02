@@ -49,7 +49,7 @@ app.use((err, req, res, next) => {
 
 try{
     const dbURL =  "mongodb://localhost:27017/bookstore";  
-    console.log(dbURL);
+    // console.log(dbURL);
 
     mongoose.connect(dbURL).then(()=>{
         console.log("db is connected succsesfully");

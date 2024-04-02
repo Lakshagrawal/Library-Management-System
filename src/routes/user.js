@@ -34,7 +34,6 @@ router.get("/registration", async(req,res)=>{
     res.render('usersign');
 })
 
-// Done
 // singup
 router.post("/usersignup",async(req,res)=>{
     // console.log(req.body);
