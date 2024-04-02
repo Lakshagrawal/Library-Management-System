@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body>
-    <div class="container">
-        <div class="row">
+    <div class="container ">
+        <div class="row text-center">
             {{#each items}}
             <div class="col-md-4">
                 <div class="card">
@@ -39,63 +41,121 @@
         </div>
     </div>
 
-    <div class="cart-container mt-4">
-        <h2>Cart</h2>
-        <div class="cart-items"></div>
-        <p class="cart-total">Total: $0.00</p>
+    <div class="container mt-4">
+        <h2 class="text-center">Cart</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card flex mx-2">
+                    <div class="card-body text-center">
+                        <div class="cart-items my-2">
+                            <div class="d-flex flex-column cart-items mx-2">
+                                <!-- Cart items will be dynamically added here -->
+                            </div>
+                        </div>
+                        <strong>
+                            <p class="cart-total text-center mt-3 ">Total: $0.00</p>
+                        </strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        {{#if Checkout}}
+        <div class="container d-flex flex-column my-4">
+            <button type="button" class="btn btn-primary text-center">Proceed to CheckOut</button>
+        </div>
+        {{/if}}
     </div>
+
+
+
+
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const addToCartButtons = document.querySelectorAll(".add-to-cart");
 
             addToCartButtons.forEach(button => {
-                button.addEventListener("click", function() {
+                button.addEventListener("click", function () {
                     const product = button.parentElement.parentElement;
                     const productName = product.querySelector(".card-title").textContent;
                     const productPrice = parseFloat(product.querySelector(".card-text").textContent.replace("Price: $", ""));
                     const quantity = parseInt(product.querySelector(".quantity-dropdown").value);
                     const totalPrice = productPrice * quantity;
 
-                    // Create cart item element
-                    const cartItem = document.createElement("div");
-                    cartItem.classList.add("cart-item");
-                    cartItem.innerHTML = `
-                        <p>${productName}</p>
-                        <p>Quantity: ${quantity}</p>
-                        <p>Total: $${totalPrice.toFixed(2)}</p>
-                        <button class="btn btn-danger remove-from-cart">Remove</button>
-                    `;
+                    // Create cart item object
+                    const cartItem = {
+                        name: productName,
+                        price: productPrice,
+                        quantity: quantity,
+                        total: totalPrice
+                    };
 
-                    const cartItemsContainer = document.querySelector(".cart-items");
-                    cartItemsContainer.appendChild(cartItem);
+                    // Retrieve existing cart items from localStorage
+                    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
 
-                    // Calculate total price of all items in the cart
-                    const cartTotal = document.querySelector(".cart-total");
-                    const currentTotal = parseFloat(cartTotal.textContent.replace("Total: $", ""));
-                    const newTotal = currentTotal + totalPrice;
-                    cartTotal.textContent = `Total: $${newTotal.toFixed(2)}`;
+                    // Add the new item to the cart
+                    cartItems.push(cartItem);
+
+                    // Store the updated cart items back to localStorage
+                    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+                    // Refresh the page to reflect the changes in the cart
+                    location.reload();
                 });
             });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Retrieve cart items from localStorage
+            let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+
+            // Get the cart items container element
+            const cartItemsContainer = document.querySelector(".cart-items");
+
+            // Iterate over the retrieved cart items and render them on the page
+            cartItems.forEach(item => {
+                const cartItem = document.createElement("div");
+                cartItem.classList.add("cart-item");
+                cartItem.classList.add("mx-2");
+                cartItem.innerHTML = `
+                <p>${item.name}</p>
+                <p>Quantity: ${item.quantity}</p>
+                <p>Total: $${item.total.toFixed(2)}</p>
+                <button class="btn btn-danger remove-from-cart">Remove</button>
+                <hr>
+            `;
+                cartItemsContainer.appendChild(cartItem);
+            });
+
+            // Calculate and display the total price of all items in the cart
+            const cartTotal = document.querySelector(".cart-total");
+            const totalAmount = cartItems.reduce((total, item) => total + item.total, 0);
+            cartTotal.textContent = `Total: $${totalAmount.toFixed(2)}`;
 
             // Add event listener to remove item from the cart
-            const cartItemsContainer = document.querySelector(".cart-items");
-            cartItemsContainer.addEventListener("click", function(event) {
+            cartItemsContainer.addEventListener("click", function (event) {
                 if (event.target.classList.contains("remove-from-cart")) {
                     const itemToRemove = event.target.parentElement;
                     const priceToRemove = parseFloat(itemToRemove.querySelector("p:nth-child(3)").textContent.replace("Total: $", ""));
-                    const cartTotal = document.querySelector(".cart-total");
-                    const currentTotal = parseFloat(cartTotal.textContent.replace("Total: $", ""));
-                    const newTotal = currentTotal - priceToRemove;
-                    cartTotal.textContent = `Total: $${newTotal.toFixed(2)}`;
+                    const updatedCartItems = cartItems.filter(item => item.total !== priceToRemove);
+                    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
                     itemToRemove.remove();
+
+                    // Recalculate and display the total price after removing an item
+                    const newTotalAmount = updatedCartItems.reduce((total, item) => total + item.total, 0);
+                    cartTotal.textContent = `Total: $${newTotalAmount.toFixed(2)}`;
                 }
             });
         });
+
     </script>
+
+
 </body>
+
 </html>
