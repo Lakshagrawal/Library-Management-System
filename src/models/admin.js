@@ -3,8 +3,9 @@ const mongoose = require("mongoose")
 
 
 const admin = new mongoose.Schema({
-    widgettext:{type:String},
-    about:{type:String},
+    user:{type:String,required:true},
+    pass:{type:String,required:true},
+    access:{type:Number,required:true},
     token:{type:String}
 })
 

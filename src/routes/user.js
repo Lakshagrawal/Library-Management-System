@@ -5,8 +5,6 @@ const vendor = require("../models/vendor")
 const cookieParser = require("cookie-parser")
 const verifUser = require("../middleware/verifyUser")
 const jwt = require("jsonwebtoken");
-// const widgetText= require("../models/widgetText");
-
 
 // use of json file in the router or || app file 
 router.use(express.json());

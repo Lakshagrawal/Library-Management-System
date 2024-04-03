@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const vendor = require("../models/vendor")
-const user = require('../models/User');
+const admin = require('../models/admin');
 const cookieParser = require("cookie-parser")
 const verifyVendor = require("../middleware/verifyVendor")
 const jwt = require("jsonwebtoken");
@@ -17,22 +17,23 @@ router.use(bodyParser.urlencoded({
 
 
 
-// --->  /user
+// --->  /admin
 
 router.get("/", async(req,res)=>{
-    const token = await req.cookies.vendortoken;
+    const token = await req.cookies.admintoken;
+
     if(!token){
-        res.render("adminhome");
+        return res.render("admin/adminlogin");
     }
     else{
         const verifyUser = await jwt.verify(token,process.env.SECRET_KEY_TOKEN) 
-        res.render('adminhome',{id:verifyUser._id});
+        return res.render('admin/adminhome',{id:verifyUser._id});
     }
     
 })
 
 router.get("/registration", async(req,res)=>{
-        res.render('vendorsign');
+        res.render('admin/adminsign');
 })
 
 
@@ -66,28 +67,29 @@ router.get("/allItems/:id",verifyVendor,async(req,res)=>{
 
 
 router.get("/logout",async(req,res)=>{
-     res.clearCookie("vendortoken");
-     res.redirect('/vendor');
+     res.clearCookie("admintoken");
+     res.redirect('/admin');
 })
 
 
 // singup
-router.post("/vendorsignup",async(req,res)=>{
-    // console.log(req.body);
-    const {email,pass,user,category} = req.body;
-    if(!email || !pass || !category || !user ){
-        res.redirect("/vendor/registration")
+router.post("/adminsignup",async(req,res)=>{
+    console.log(req.body);
+    const {pass,user} = req.body;
+    if(!pass || !user ){
+        res.redirect("/user/registration")
     }
     else{
         try{
-            const newUser = new vendor({
-                email,
+            // make admin as admin
+            let access = 0;
+            const newUser = new admin({
                 pass,
                 user,
-                category
+                access
             });
             await newUser.save();
-            return res.redirect('/vendor/')
+            return res.redirect('/admin/')
         }
         catch(err){
             console.log(err);
@@ -97,21 +99,27 @@ router.post("/vendorsignup",async(req,res)=>{
 })
 
 // login
-router.post("/vendorsignin",async(req,res)=>{
+router.post("/adminsignin",async(req,res)=>{
     // console.log(req.body);
     const {pass,user} = req.body;
 
     if(!user || !pass){
-        res.redirect("/vendor")
+        res.redirect("/admin")
     }
     else{
         try{
             const {user,pass} =  req.body;
-            const usersdb = await vendor.findOne({user:user});
+            // console.log(req.body)
+            const usersdb = await admin.findOne({user:user});
             if(!usersdb){
                 return res.status(404).json({error : "Please Enter Correct User and Password", "server": "ok"});
             }
 
+            if(usersdb.access == 0){
+                console.log("admin what's to login")
+                return res.json({error : "Admin is not have Access to login", "server": "ok"});
+            }
+            
             if(pass == usersdb.pass){
                 try {
                     // this ==> User   value
@@ -119,12 +127,13 @@ router.post("/vendorsignin",async(req,res)=>{
                     // console.log("lakshya" , token);
                     usersdb.token = token
                     await usersdb.save();
-                    res.cookie('vendortoken', token);
+                    res.cookie('admintoken', token);
 
                 } catch (error) {
-                    console.log("the error part" + error);
+                    console.log("Auth is not done properly" + error);
                 }
-                return res.redirect("/vendor")
+
+                return res.redirect("/admin")
             }
             else{
                 // Incorect user and password
@@ -164,7 +173,7 @@ router.post("/addItems/:id",verifyVendor,upload.single('img'),async(req,res)=>{
     
     const id = req.params.id; // Accessing the id parameter from the URL
     const { itemname, price } = req.body;
-    console.log(req.file)
+    // console.log(req.file)
     try {
         // Find the vendor by ID
         const vendorUser = await vendor.findById(id);
