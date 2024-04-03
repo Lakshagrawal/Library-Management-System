@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const User = require("../models/User")
 const vendor = require("../models/vendor")
+const items = require("../models/items")
 const cookieParser = require("cookie-parser")
 const verifUser = require("../middleware/verifyUser")
 const jwt = require("jsonwebtoken");
@@ -9,43 +10,43 @@ const jwt = require("jsonwebtoken");
 // use of json file in the router or || app file 
 router.use(express.json());
 router.use(cookieParser())
-const  bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
 router.use(bodyParser.urlencoded({
-    extended:true
+    extended: true
 }))
 
 
 
 // --->  /user
 
-router.get("/", async(req,res)=>{
+router.get("/", async (req, res) => {
     const token = await req.cookies.usertoken;
-    if(!token){
+    if (!token) {
         res.render("userlogin");
     }
-    else{
-        const verifyUser = await jwt.verify(token,process.env.SECRET_KEY_TOKEN) 
-        res.render('userhome',{id:verifyUser._id});
+    else {
+        const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
+        res.render('userhome', { id: verifyUser._id });
     }
 })
-router.get("/registration", async(req,res)=>{
+router.get("/registration", async (req, res) => {
     res.render('usersign');
 })
 
 
 // singup
-router.post("/usersignup",async(req,res)=>{
+router.post("/usersignup", async (req, res) => {
     // console.log(req.body);
-    const {email,pass,user} = req.body;
-    if(!email || !pass || !user ){
+    const { email, pass, user } = req.body;
+    if (!email || !pass || !user) {
         // console.log("hello")
         res.redirect("/user/registration")
     }
-    else{
-        try{
-            const usersdb = await User.findOne({user:user});
-            if(!usersdb){
-               return res.redirect("/user/",{samepassworderror:true});
+    else {
+        try {
+            const usersdb = await User.findOne({ user: user });
+            if (!usersdb) {
+                return res.redirect("/user/", { samepassworderror: true });
             }
             const newUser = new User({
                 email,
@@ -55,27 +56,27 @@ router.post("/usersignup",async(req,res)=>{
             await newUser.save();
             return res.redirect('/user/')
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             res.status(501).send("server error")
         }
     }
 })
 
-router.get("/categories/:categ",async(req,res)=>{
+router.get("/categories/:categ", async (req, res) => {
     const categorie = req.params.categ;
 
-    const vendordata = await vendor.find({ category:categorie});
+    const vendordata = await vendor.find({ category: categorie });
     if (!vendordata) {
         return res.status(404).json({ error: 'No Category found' });
     }
     // console.log(vendordata)
-    res.render("usercategories",{vendordata:vendordata,categorie:categorie})
+    res.render("usercategories", { vendordata: vendordata, categorie: categorie })
 })
 
-router.get("/allItems/:id",verifUser,async(req,res)=>{
+router.get("/allItems/:id", verifUser, async (req, res) => {
     const id = req.params.id; // Accessing the id parameter from the URL
-    const vendorUser = await vendor.findOne({ _id: id});
+    const vendorUser = await vendor.findOne({ _id: id });
     if (!vendorUser) {
         return res.status(404).json({ error: 'Vendor not found' });
     }
@@ -87,16 +88,16 @@ router.get("/allItems/:id",verifUser,async(req,res)=>{
         price: item.price,
         img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}`, // Convert binary data to base64 data URI
         _id: item._id,
-        data:id
+        data: id
     }));
-    
-    
+
+
     // console.log(category)
-    res.render("userAllItems",{items: allItems,category:category})
+    res.render("userAllItems", { items: allItems, category: category })
 })
 
 
-router.get("/userCart",verifUser,async(req,res)=>{
+router.get("/userCart", verifUser, async (req, res) => {
     const vendorid = req.query.vendorid;
     const itemid = req.query.itemid;
     // console.log(vendorid)
@@ -120,39 +121,39 @@ router.get("/userCart",verifUser,async(req,res)=>{
         }];
 
         // console.log(allItems.length)
-        
+
         // res.status(200).json({ items: allItems });
-        return res.render("userCart",{items:allItems,vendorid:vendorid})
+        return res.render("userCart", { items: allItems, vendorid: vendorid })
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-    
+
 })
 
 
 // /user/usersignin
 // login
-router.post("/usersignin",async(req,res)=>{
+router.post("/usersignin", async (req, res) => {
     // console.log(req.body);
-    const {pass,user} = req.body;
+    const { pass, user } = req.body;
 
-    if(!user || !pass){
+    if (!user || !pass) {
         res.redirect("/user")
     }
-    else{
-        try{
-            const {user,pass} =  req.body;
-            const usersdb = await User.findOne({user:user});
-            if(!usersdb){
-                return res.status(404).json({error : "Please Enter Correct User and Password", "server": "ok"});
+    else {
+        try {
+            const { user, pass } = req.body;
+            const usersdb = await User.findOne({ user: user });
+            if (!usersdb) {
+                return res.status(404).json({ error: "Please Enter Correct User and Password", "server": "ok" });
             }
 
-            if(pass == usersdb.pass){
+            if (pass == usersdb.pass) {
                 try {
                     // this ==> User   value
-                    const token = jwt.sign({_id:usersdb._id},process.env.SECRET_KEY_TOKEN);
+                    const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
                     // console.log("lakshya" , token);
                     usersdb.token = token
                     await usersdb.save();
@@ -163,12 +164,12 @@ router.post("/usersignin",async(req,res)=>{
                 }
                 return res.redirect("/user")
             }
-            else{
+            else {
                 // Incorect user and password
-                return res.status(400).json({error:"Invalid Crediantial" , server: "ok"});
+                return res.status(400).json({ error: "Invalid Crediantial", server: "ok" });
             }
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             return res.status(501).send("server error")
         }
@@ -176,29 +177,41 @@ router.post("/usersignin",async(req,res)=>{
 })
 
 
-router.get("/logout",async(req,res)=>{
-     res.clearCookie("usertoken");
-     res.redirect('/user');
+router.get("/logout", async (req, res) => {
+    res.clearCookie("usertoken");
+    res.redirect('/user');
 })
 
 
-router.get("/cart",async(req,res)=>{
-   res.render("userCart",{Checkout:true})
-    
+router.get("/cart", verifUser, async (req, res) => {
+    res.render("userCart", { Checkout: true })
+
 })
 
-router.get("/usertransection",async(req,res)=>{
+router.get("/usertransection", async (req, res) => {
     res.render("usertransection")
-     
- })
- 
- router.get("/userorderstatus",async(req,res)=>{
-    res.render("userorderstatus");
-     
- })
+
+})
+
+router.get("/userorderstatus", verifUser, async (req, res) => {
+    try {
+        const token = req.cookies.usertoken;
+        const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+        const userid = verifyUser._id;
+
+        const userItems = await items.find({ user: userid });
+
+        // Render the userorderstatus view and pass the userItems data to it
+        res.render("userorderstatus", { items: userItems });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+})
 
 
- router.post("/payment",async(req,res)=>{
+router.post("/payment", async (req, res) => {
     // Process payment...
 
     // Send response with JavaScript code to clear localStorage
@@ -210,14 +223,58 @@ router.get("/usertransection",async(req,res)=>{
         </script>
     `;
     res.send(clearLocalStorageScript);
-     
- })
 
- router.get("/successpayment",async(req,res)=>{
+})
+
+router.get("/successpayment", async (req, res) => {
     res.render("successpayment");
-     
- })
 
+})
+
+
+router.post("/orderStatus", async (req, res) => {
+    // console.log(req.body);
+
+    try {
+        const token = req.cookies.usertoken;
+        const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+        const userdata = await User.findOne({ _id: verifyUser._id });
+
+        if (req.body) {
+            // console.log(req.body);
+            
+            // Iterate over the list of items in req.body and save each item individually
+            for (const item of req.body) {
+                const newItem = new items({
+                    user: verifyUser._id, // Assuming you want to associate the items with the user
+                    items: {
+                        name: item.name,
+                        quantity: item.quantity,
+                        total: item.total,
+                        bookid:item.id
+                    },
+                    status: "Pending" // Assuming status is always "Pending" for new items
+                });
+
+                // Save the newItem object to the database
+                await newItem.save();
+            }
+
+            res.status(200).json({ message: 'New items created successfully' });
+        } else {
+            throw new Error('Items array is missing or invalid in the request body');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+router.get("/successpayment", async (req, res) => {
+    res.render("successpayment");
+
+})
 
 
 

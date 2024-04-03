@@ -56,5 +56,42 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 </body>
+<script>
+    // Retrieve data from local storage
+    //localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    var userData = JSON.parse(localStorage.getItem('cartItems'));
+
+    // Check if userData is not null or undefined
+    if (userData) {
+        // Prepare request options
+        var requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        };
+
+        // Send data to the server using Fetch API
+        fetch('/user/orderStatus', requestOptions)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle successful response from the server
+                console.log('Data sent successfully:', data);
+            })
+            .catch(error => {
+                // Handle errors
+                console.error('Error:', error);
+            });
+    } else {
+        console.log('No user data found in local storage.');
+    }
+
+</script>
 
 </html>
