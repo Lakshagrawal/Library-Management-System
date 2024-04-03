@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const vendor = require("../models/vendor")
-const user = require('../models/User');
+const items = require('../models/items');
 const cookieParser = require("cookie-parser")
 const verifyVendor = require("../middleware/verifyVendor")
 const jwt = require("jsonwebtoken");
@@ -147,20 +147,20 @@ router.get("/transactions", verifyVendor, async (req, res) => {
     const token = await req.cookies.vendortoken;
     const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
     // console.log(verifyUser)
-    
+
     if (!token) {
         res.render("vendorlogin");
     }
     else {
         try {
             // Transaction schema define kar na hai 
-            const vendorTransaction = await vendor.find({ _id: verifyUser._id });
+            const vendorTransaction = await items.find({ vendorid: verifyUser._id });
+            const id = req.params.id; // Accessing the id parameter from the URL
+            res.render("vendortransaction", {items:vendorTransaction});
         } catch (error) {
             console.log(error)
         }
     }
-    const id = req.params.id; // Accessing the id parameter from the URL
-    res.render("vendorAddItems");
 })
 
 

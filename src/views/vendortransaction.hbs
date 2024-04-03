@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items Table</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col d-flex justify-content-between">
+                <div>
+                    <a href="/vendor" class="btn btn-primary btn-lg mb-3">Back</a>
+                </div>
+                <div>
+                    <a href="/vendor/logout" class="btn btn-primary btn-lg mb-3">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Items Table</h1>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each items}}
+                <tr>
+                    <td>{{this.items.name}}</td>
+                    <td>{{this.items.quantity}}</td>
+                    <td>{{this.items.total}}</td>
+                    <td>{{this.status}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS (optional if you don't need JavaScript features from Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Include Handlebars library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+
+</body>
+
+</html>

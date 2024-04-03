@@ -123,7 +123,7 @@ router.get("/userCart", verifUser, async (req, res) => {
         // console.log(allItems.length)
 
         // res.status(200).json({ items: allItems });
-        return res.render("userCart", { items: allItems, vendorid: vendorid })
+        return res.render("userCart", { items: allItems, vendorid: vendorid, vendorname: vendorUser.user })
 
     } catch (error) {
         console.error(error);
@@ -242,7 +242,7 @@ router.post("/orderStatus", async (req, res) => {
 
         if (req.body) {
             // console.log(req.body);
-            
+
             // Iterate over the list of items in req.body and save each item individually
             for (const item of req.body) {
                 const newItem = new items({
@@ -251,9 +251,10 @@ router.post("/orderStatus", async (req, res) => {
                         name: item.name,
                         quantity: item.quantity,
                         total: item.total,
-                        bookid:item.id
+                        bookid: item.id,
                     },
-                    status: "Pending" // Assuming status is always "Pending" for new items
+                    status: "Pending", // Assuming status is always "Pending" for new items
+                    vendorid: item.vendorid
                 });
 
                 // Save the newItem object to the database

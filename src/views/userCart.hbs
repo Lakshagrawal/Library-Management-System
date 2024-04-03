@@ -20,7 +20,7 @@
 
     <div class="container ">
 
-        <h1 class="text-center">All Cart Items</h1>
+        <h1 class="text-center">All Cart Items of Vendor: {{vendorname}}</h1>
         <div class="row text-center">
             {{#each items}}
             <div class="col-md-4">
@@ -46,11 +46,13 @@
                         <p class="total-price">Total: ${{this.price}}</p>
                         <button class="btn btn-primary add-to-cart">Add to Cart</button>
                     </div>
-                    <small class="card-title" id="itemid">{{this._id}}</small>
+                    <small class="card-title" id="itemid">item: {{this._id}}</small>
                 </div>
             </div>
             {{/each}}
         </div>
+        <small  class="container">vendor:</small>
+        <small class="container" id="vendorid">{{vendorid}}</small>
     </div>
 
     <div class="container mt-4">
@@ -88,6 +90,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        let vendorid = document.getElementById("vendorid").textContent;
+
         document.addEventListener("DOMContentLoaded", function () {
             const addToCartButtons = document.querySelectorAll(".add-to-cart");
 
@@ -105,7 +109,8 @@
                         price: productPrice,
                         quantity: quantity,
                         total: totalPrice,
-                        id: itemid
+                        id: itemid,
+                        vendorid:vendorid,
                     };
 
                     // Retrieve existing cart items from localStorage

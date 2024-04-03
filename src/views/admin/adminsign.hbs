@@ -32,21 +32,16 @@
         </div>
     </div>
     <header class="s-header">
-
-        <div class="container d-flex">
-            <nav class="s-header__nav-wrap">
-
-                <div class="row ">
-
-                    <ul class="s-header__nav d-flex p-3 mx-2">
-                        <li><a href="/" class="mx-4">Home</a></li>
-                        <li><a class="mx-4" href="/admin">login</a></li>
-
-                    </ul> <!-- end #nav -->
+       <nav class="s-header__nav-wrap container mt-4">
+            <div class="row justify-content-between">
+                <div class="col-auto">
+                    <a href="/" class="btn btn-primary">Home</a>
                 </div>
-
-            </nav> <!-- end #nav-wrap -->
-        </div>
+                <div class="col-auto">
+                    <a href="/admin/" class="btn btn-primary">Login</a>
+                </div>
+            </div>
+        </nav>
     </header> <!-- Header End -->
 
 
@@ -54,7 +49,7 @@
 
     <div class="container">
         <form action="/admin/adminsignup" method="post">
-            <div class="title text-center mt-4">Admin Registration</div>
+            <h1 class="title text-center mt-4">Admin Registration</h1>
             <div class="mb-3">
                 <label for="userId" class="form-label">User ID</label>
                 <input type="text" class="form-control" name="user" id="userId" aria-describedby="userIdHelp">

@@ -32,24 +32,16 @@
         </div>
     </div>
     <header class="s-header">
-
-
-        <nav class="s-header__nav-wrap">
-
-            <div class="row">
-
-                <ul class="s-header__nav">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/vendor/">login</a></li>
-                    <li><a href="/user/logOut">Log Out</a></li>
-
-                </ul> <!-- end #nav -->
+       <nav class="s-header__nav-wrap container mt-4">
+            <div class="row justify-content-between">
+                <div class="col-auto">
+                    <a href="/" class="btn btn-primary">Home</a>
+                </div>
+                <div class="col-auto">
+                    <a href="/user/" class="btn btn-primary">Login</a>
+                </div>
             </div>
-
-        </nav> <!-- end #nav-wrap -->
-
-        <a class="header-menu-toggle" href="#0" title="Menu"><span>Menu</span></a>
-
+        </nav>
     </header> <!-- Header End -->
 
 
@@ -57,7 +49,7 @@
 
     <div class="container">
         <form action="/user/usersignup" method="post">
-            <div class="title text-center mt-4">User Registration</div>
+            <h1 class="title text-center mt-4">User Registration</h1>
             <div class="mb-3">
                 <label for="userId" class="form-label">User ID</label>
                 <input type="text" class="form-control" name="user" id="userId" aria-describedby="userIdHelp">
