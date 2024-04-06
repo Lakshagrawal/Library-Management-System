@@ -27,6 +27,7 @@
         <table class="table table-bordered">
             <thead class="thead-dark">
                 <tr>
+                    <th scope="col">S.No.</th>
                     <th scope="col">Name</th>
                     <th scope="col">Quantity</th>
                     <th scope="col">Total</th>
@@ -36,10 +37,17 @@
             <tbody>
                 {{#each items}}
                 <tr>
+                    <td>{{@index}}</td>
                     <td>{{this.items.name}}</td>
                     <td>{{this.items.quantity}}</td>
                     <td>{{this.items.total}}</td>
-                    <td>{{this.status}}</td>
+                    {{!-- <td>{{this.status}}</td> --}}
+                    <td>
+                        <select class="form-select status-dropdown" data-id="{{this._id}}">
+                            <option value="Pending" {{#if (eq this.status "Pending" )}}selected{{/if}}>Pending</option>
+                            <option value="Order" {{#if (eq this.status "Order" )}}selected{{/if}}>Order</option>
+                        </select>
+                    </td>
                 </tr>
                 {{/each}}
             </tbody>
@@ -53,7 +61,36 @@
 
     <!-- Include Handlebars library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const statusDropdowns = document.querySelectorAll('.status-dropdown');
 
+            statusDropdowns.forEach(dropdown => {
+                dropdown.addEventListener('change', function () {
+                    const itemId = this.getAttribute('data-id');
+                    const newStatus = this.value;
+
+                    fetch(`/updateStatus/${itemId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                console.log('Status updated successfully');
+                            } else {
+                                console.error('Failed to update status');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

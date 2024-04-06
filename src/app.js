@@ -12,10 +12,13 @@ app.use(bodyParser.urlencoded({
     extended:true
 }))
 
-
 // Set view engine to hbs
 app.set('view engine','hbs')
 app.set('views',path.join(__dirname,'/views'))
+hbs.handlebars.registerHelper('eq', function(a,b) {
+    return a===b;
+  })
+
 
 // static file use 
 app.use('/static',express.static(path.join(__dirname,'../public')));

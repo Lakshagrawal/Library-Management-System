@@ -46,11 +46,14 @@ router.get("/allItems/:id", verifyVendor, async (req, res) => {
         }
         // const allitems = vendorUser.items;
         // Extract items from the vendor
+        // console.log(vendorUser)
         const allItems = vendorUser.items.map(item => ({
+            id:item._id,
             itemname: item.itemname,
             price: item.price,
             img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}` // Convert binary data to base64 data URI
         }));
+        // console.log(allItems)
 
         // console.log("Items:", allItems);
         res.render("vendorAllItems", { items: allItems })
@@ -58,6 +61,35 @@ router.get("/allItems/:id", verifyVendor, async (req, res) => {
         console.log(error)
     }
 
+})
+
+router.post("/deleteItem", verifyVendor, async (req, res) => {
+    const vendorId = req.query.vendorId; // Accessing the vendorId query parameter
+    const itemId = req.query.itemId; // Accessing the itemId query parameter
+    console.log(vendorId, " vendor ", itemId)
+    try {
+        const vendordata = await vendor.findById(vendorId);
+
+        if (!vendordata) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+
+        console.log(vendordata)
+        const itemIndex = vendordata.items.findIndex(item => item._id.toString() === itemId);
+
+        if (itemIndex === -1) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+        console.log("item index "+itemIndex)
+        vendordata.items.splice(itemIndex, 1); // Remove the item from the items array
+        // console.log(object)
+        await vendordata.save(); // Save the updated vendor document
+
+        res.status(200).json({ message: 'Item deleted successfully' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 })
 
 
