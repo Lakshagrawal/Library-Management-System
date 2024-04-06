@@ -10,13 +10,13 @@
 
 <body>
   <div class="container d-flex justify-content-between mt-4">
-        <div class="col-lg-2 col-md-4">
-            <a href="/vendor" class="btn btn-primary btn-lg btn-block mb-3">Back</a>
-        </div>
-        <div class="col-lg-2 col-md-4">
-            <a href="/vendor/logout" class="btn btn-primary btn-lg btn-block mb-3">Logout</a>
-        </div>
+    <div class="col-lg-2 col-md-4">
+      <a href="/vendor" class="btn btn-primary btn-lg btn-block mb-3">Back</a>
     </div>
+    <div class="col-lg-2 col-md-4">
+      <a href="/vendor/logout" class="btn btn-primary btn-lg btn-block mb-3">Logout</a>
+    </div>
+  </div>
   <div class="container mt-4">
     <h1 class="mb-4">Vendor All Items</h1>
     <div class="row">
@@ -24,18 +24,64 @@
       <div class="col-md-4">
         <div class="card mb-4">
           <img src="{{this.img}}" class="card-img-top" alt="{{this.itemname}}">
-          <div class="card-body">
-            <h5 class="card-title">{{this.itemname}}</h5>
-            <p class="card-text">Price: {{this.price}}</p>
+          <div class="container text-center">
+            <div class="card-body">
+              <h5 class="card-title">{{this.itemname}}</h5>
+              <p class="card-text">Price: {{this.price}}</p>
+              <p><label for="item-id" class="mb-0">Item Id:</label> <span class="item-id">{{this.id}}</span></p>
+              <button class="btn btn-danger remove-btn">Remove</button>
+            </div>
           </div>
         </div>
       </div>
+
       {{/each}}
 
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Include this script at the end of your HTML body or in a separate JavaScript file -->
+  <script>
+    // Get all remove buttons
+    var removeButtons = document.querySelectorAll('.remove-btn');
+
+    // Add click event listener to each remove button
+    removeButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        // Get the item ID associated with this remove button
+        let itemId = this.parentElement.querySelector('.item-id').textContent.trim();
+        console.log(itemId)
+        let vendorId = window.location.pathname.split('/')[3]; // Assuming the vendor ID is the 4th segment of the URL
+        console.log(vendorId)
+        // Send delete request to the server
+        let url = `/vendor/deleteItem?vendorId=${vendorId}&itemId=${itemId}`;
+
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+            // Add any additional headers if required
+          },
+          // Add any body data if required
+        })
+          .then(response => {
+            if (response.ok) {
+              // Handle success response
+              console.log('Item deleted successfully');
+              location.reload();
+            } else {
+              // Handle error response
+              throw new Error('Failed to delete item');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+    });
+  </script>
+
 </body>
 
 </html>
