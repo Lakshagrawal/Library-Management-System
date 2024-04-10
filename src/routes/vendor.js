@@ -103,9 +103,10 @@ router.get("/logout", async (req, res) => {
 router.post("/vendorsignup", async (req, res) => {
     // console.log(req.body);
     const { email, pass, user, category } = req.body;
-    const currentDate = new Date();
+    const expireDate = new Date();
     // vendor is registre for now 6th months
-    currentDate.setMonth(currentDate.getMonth() + 6); // Add 6 months
+    expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
+
     if (!email || !pass || !category || !user) {
         res.redirect("/vendor/registration")
     }
@@ -115,7 +116,8 @@ router.post("/vendorsignup", async (req, res) => {
                 email,
                 pass,
                 user,
-                category
+                category,
+                expireDate
             });
             await newUser.save();
             return res.redirect('/vendor/')

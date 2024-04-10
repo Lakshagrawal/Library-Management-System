@@ -38,6 +38,11 @@ router.get("/registration", async (req, res) => {
 router.post("/usersignup", async (req, res) => {
     // console.log(req.body);
     const { email, pass, user } = req.body;
+    const expireDate = new Date();
+    // user is registre for now 6th months
+    expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
+
+
     if (!email || !pass || !user) {
         // console.log("hello")
         res.redirect("/user/registration")
@@ -51,7 +56,8 @@ router.post("/usersignup", async (req, res) => {
             const newUser = new User({
                 email,
                 pass,
-                user
+                user,
+                expireDate
             });
             await newUser.save();
             return res.redirect('/user/')
