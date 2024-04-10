@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const User = require("../models/User")
+const User = require("../models/user")
 const vendor = require("../models/vendor")
 const items = require("../models/items")
 const cookieParser = require("cookie-parser")

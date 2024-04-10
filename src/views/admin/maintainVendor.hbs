@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Buttons</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        /* Additional styling */
+        .btn {
+            padding: 10px 20px; /* Added padding to the buttons */
+            margin: 5px; /* Added margin to the buttons */
+        }
+
+        .container {
+            margin-top: 40px; /* Increased top margin of the container */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h1>Maintain Vendor</h1>
+    <div class="row">
+        <div class="col-xs-12">
+            <a href="/admin" class="btn btn-primary">Home</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="membership">
+                <button href="#" class="btn btn-primary">Membership</button>
+                <a href="/admin/allVendor" class="btn btn-primary">All Vendor</a>
+                <a href="#" class="btn btn-primary">Update</a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="userManagement">
+                <button href="#" class="btn btn-primary">Vendor Management</button>
+                <a href="/admin/allVendor" class="btn btn-primary">All Vendor</a>
+                <a href="#" class="btn btn-primary">Update</a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <a href="/admin/logout" class="btn btn-primary">Log Out</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>

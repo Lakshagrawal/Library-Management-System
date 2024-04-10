@@ -17,7 +17,8 @@ const Vendor = new mongoose.Schema({
         }
 
     }],
-    category:{type:String,required:true}
+    category:{type:String,required:true},
+    date: {type:Date}
 })
 
 

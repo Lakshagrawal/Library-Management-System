@@ -1,9 +1,11 @@
 const express = require('express')
 const router = express.Router()
+// Models import
 const vendor = require("../models/vendor")
 const admin = require('../models/admin');
+const User = require('../models/user');
 const cookieParser = require("cookie-parser")
-const verifyVendor = require("../middleware/verifyVendor")
+const verifyAdmin = require("../middleware/verifyadmin")
 const jwt = require("jsonwebtoken");
 
 
@@ -11,6 +13,7 @@ const jwt = require("jsonwebtoken");
 router.use(express.json());
 router.use(cookieParser())
 const  bodyParser = require("body-parser");
+const user = require('../models/user');
 router.use(bodyParser.urlencoded({
     extended:true
 }))
@@ -36,34 +39,71 @@ router.get("/registration", async(req,res)=>{
         res.render('admin/adminsign');
 })
 
+router.get("/maintainUser", async(req,res)=>{
+        res.render('admin/maintainUser');
+})
+router.get("/maintainVendor", async(req,res)=>{
+        res.render('admin/maintainVendor');
+})
 
-router.get("/allItems/:id",verifyVendor,async(req,res)=>{
-    const id = req.params.id; // Accessing the id parameter from the URL
+router.get("/allUser", verifyAdmin, async(req,res)=>{
     try {
-        const vendorUser = await vendor.findOne({ _id: id});
-        if (!vendorUser) {
-            return res.status(404).json({ error: 'Vendor not found' });
-        }
-        // console.log(vendorUser)
+        // Find all users from the User models
+        const users = await User.find();
+        res.render("admin/adminAlluser",{users});
+        // res.json(users)
+      } 
+      catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+      }
+})
+
+
+router.get("/allVendor", async(req,res)=>{
+    try {
+        // Find all users from the User models
+        const vendors = await vendor.find();
+        
+        // res.json(vendors)
+        res.render("admin/adminAllvendor",{vendors});
+      } 
+      catch (error) {
+        // Handle errors
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+      }
+})
+
+
+// router.get("/allItems/:id",verifyVendor,async(req,res)=>{
+//     const id = req.params.id; // Accessing the id parameter from the URL
+//     try {
+//         const vendorUser = await vendor.findOne({ _id: id});
+//         if (!vendorUser) {
+//             return res.status(404).json({ error: 'Vendor not found' });
+//         }
+//         // console.log(vendorUser)
     
    
-    // const allitems = vendorUser.items;
-    // Extract items from the vendor
-    const allItems = vendorUser.items.map(item => ({
-        itemname: item.itemname,
-        price: item.price,
-        img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}` // Convert binary data to base64 data URI
-    }));
+//     // const allitems = vendorUser.items;
+//     // Extract items from the vendor
+//     const allItems = vendorUser.items.map(item => ({
+//         itemname: item.itemname,
+//         price: item.price,
+//         img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}` // Convert binary data to base64 data URI
+//     }));
     
-    // console.log("Items:", allItems);
-    // console.log("hello my name is lakshya" , allItems)
-    res.render("vendorAllItems",{items:allItems})
-    } catch (error) {
-        console.log(error)
-        res.send(error)
-    }
+//     // console.log("Items:", allItems);
+//     // console.log("hello my name is lakshya" , allItems)
+//     res.render("vendorAllItems",{items:allItems})
+//     } catch (error) {
+//         console.log(error)
+//         res.send(error)
+//     }
     
-})
+// })
 
 
 router.get("/logout",async(req,res)=>{
@@ -72,7 +112,7 @@ router.get("/logout",async(req,res)=>{
 })
 
 
-// singup
+// admin singup
 router.post("/adminsignup",async(req,res)=>{
     console.log(req.body);
     const {pass,user} = req.body;
@@ -97,6 +137,7 @@ router.post("/adminsignup",async(req,res)=>{
         }
     }
 })
+
 
 // login
 router.post("/adminsignin",async(req,res)=>{
@@ -148,61 +189,6 @@ router.post("/adminsignin",async(req,res)=>{
 })
 
 
-
-
-// Done
-router.get("/addItems/:id",verifyVendor,async(req,res)=>{
-    const id = req.params.id; // Accessing the id parameter from the URL
-    res.render("vendorAddItems",{id});
-})
-
-
-
-// Import necessary packages
-const multer = require('multer');
-
-// Set up Multer storage
-const storage = multer.memoryStorage(); // Store files in memory as Buffers
-const upload = multer({ storage: storage });
-
-// Controller method to handle file upload
-exports.uploadFile = upload.single('img'); // 'img' is the name attribute of the file input field in the form
-
-
-router.post("/addItems/:id",verifyVendor,upload.single('img'),async(req,res)=>{
-    
-    const id = req.params.id; // Accessing the id parameter from the URL
-    const { itemname, price } = req.body;
-    // console.log(req.file)
-    try {
-        // Find the vendor by ID
-        const vendorUser = await vendor.findById(id);
-        if (!vendorUser) {
-            return res.status(404).json({ error: 'Vendor not found' });
-        }
-
-        // Create new item for the vendor
-        const newItem = {
-            itemname,
-            price,
-            img: {
-                data: req.file.buffer, // Access the uploaded file from the request object
-                contentType: req.file.mimetype // Set the content type of the file
-            }
-        };
-
-        // Add the new item to the vendor's items array
-        vendorUser.items.push(newItem);
-
-        // Save the vendor with the new item to the database
-        await vendorUser.save();
-        res.redirect("/vendor")
-        // res.json(vendorUser); // Return the updated vendor object
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
-    }
-})
 
 
 
