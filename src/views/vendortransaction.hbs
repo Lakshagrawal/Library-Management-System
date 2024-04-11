@@ -70,7 +70,7 @@
                     const itemId = this.getAttribute('data-id');
                     const newStatus = this.value;
 
-                    fetch(`/updateStatus/${itemId}`, {
+                    fetch(`/vendor/updateStatus/${itemId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
