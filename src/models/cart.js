@@ -11,10 +11,12 @@ const cart = new mongoose.Schema({
         img:{ 
             data: Buffer,
             contentType: String
-        }
+        },
+        quantity:{type:Number},
+        vendorid:{type:String},
+        total:{typde:Number}
 
     }],
 })
-
 
 module.exports = mongoose.model('cart',cart);
