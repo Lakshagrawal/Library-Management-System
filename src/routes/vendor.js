@@ -68,7 +68,7 @@ router.get("/allItems/:id", verifyVendor, async (req, res) => {
 router.post("/deleteItem", verifyVendor, async (req, res) => {
     const vendorId = req.query.vendorId; // Accessing the vendorId query parameter
     const itemId = req.query.itemId; // Accessing the itemId query parameter
-    console.log(vendorId, " vendor ", itemId)
+    // console.log(vendorId, " vendor ", itemId)
     try {
         const vendordata = await vendor.findById(vendorId);
 
@@ -76,13 +76,13 @@ router.post("/deleteItem", verifyVendor, async (req, res) => {
             return res.status(404).json({ error: 'Vendor not found' });
         }
 
-        console.log(vendordata)
+        // console.log(vendordata)
         const itemIndex = vendordata.items.findIndex(item => item._id.toString() === itemId);
 
         if (itemIndex === -1) {
             return res.status(404).json({ error: 'Item not found' });
         }
-        console.log("item index "+itemIndex)
+        // console.log("item index "+itemIndex)
         vendordata.items.splice(itemIndex, 1); // Remove the item from the items array
         // console.log(object)
         await vendordata.save(); // Save the updated vendor document
@@ -256,6 +256,27 @@ router.post("/addItems/:id", verifyVendor, upload.single('img'), async (req, res
     }
 })
 
+
+// Define a route for updating the status of items
+router.post('/updateStatus/:itemId', async (req, res) => {
+    const { itemId } = req.params;
+    const { status } = req.body;
+    // console.log(req.body)
+    try {
+        // Find the item by ID and update its status
+        const updatedItem = await items.findByIdAndUpdate(itemId, { status: status }, { new: true });
+
+        if (!updatedItem) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        // Return the updated item
+        res.json(updatedItem);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 
 
