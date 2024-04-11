@@ -3,6 +3,7 @@ const router = express.Router()
 const User = require("../models/user")
 const vendor = require("../models/vendor")
 const items = require("../models/items")
+const cart = require("../models/cart")
 const cookieParser = require("cookie-parser")
 const verifUser = require("../middleware/verifyUser")
 const jwt = require("jsonwebtoken");
@@ -30,7 +31,8 @@ router.get("/", async (req, res) => {
     }
 })
 router.get("/registration", async (req, res) => {
-    res.render('usersign');
+    const error = req.query.error;
+    res.render('usersign', { error: error });
 })
 
 
@@ -42,16 +44,18 @@ router.post("/usersignup", async (req, res) => {
     // user is registre for now 6th months
     expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
 
+    console.log(req.body);
 
     if (!email || !pass || !user) {
         // console.log("hello")
-        res.redirect("/user/registration")
+        res.redirect("/user/registration?error=MissingFields")
     }
     else {
         try {
             const usersdb = await User.findOne({ user: user });
-            if (!usersdb) {
-                return res.redirect("/user/", { samepassworderror: true });
+            console.log(usersdb)
+            if (usersdb) {
+                return res.redirect("/user/registration?error=UsernameTaken");
             }
             const newUser = new User({
                 email,
@@ -190,6 +194,7 @@ router.get("/logout", async (req, res) => {
 
 
 router.get("/cart", verifUser, async (req, res) => {
+
     res.render("userCart", { Checkout: true })
 
 })

@@ -31,8 +31,10 @@ router.get("/", async (req, res) => {
 
 })
 
+
 router.get("/registration", async (req, res) => {
-    res.render('vendorsign');
+    const error = req.query.error;
+    res.render('vendorsign', { error: error });
 })
 
 
@@ -108,18 +110,24 @@ router.post("/vendorsignup", async (req, res) => {
     expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
 
     if (!email || !pass || !category || !user) {
-        res.redirect("/vendor/registration")
+        res.redirect("/vendor/registration?error=MissingFields")
     }
     else {
         try {
-            const newUser = new vendor({
+            const vendordb = await vendor.findOne({user:user});
+            if (vendordb) {
+                return res.redirect("/vendor/registration?error=UsernameTaken");
+            }
+
+            const newVendor = new vendor({
                 email,
                 pass,
                 user,
                 category,
                 expireDate
             });
-            await newUser.save();
+
+            await newVendor.save();
             return res.redirect('/vendor/')
         }
         catch (err) {

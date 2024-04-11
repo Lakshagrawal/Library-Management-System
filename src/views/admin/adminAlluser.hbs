@@ -21,43 +21,43 @@
         <div class="row">
             {{#each users}}
             <div class="col-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title text-center">{{this.user}}</h5>
-                        {{!-- <h6 class="card-subtitle mb-2 text-body-secondary">{{this.email}}</h6> --}}
+                <form action="/admin/updateUser/{{this._id}}" method="post">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">{{this.user}}</h5>
 
-                        <!-- Username -->
-                        <div class="form-group">
-                            <label for="username{{@index}}">Username:</label>
-                            <small class="text-center">{{this._id}}</small>
-                            <input type="text" class="form-control" id="username{{@index}}"
-                                placeholder="Enter username" value="{{this.user}}">
-                        </div>
+                            <!-- Username -->
+                            <div class="form-group">
+                                <label for="username{{@index}}">Username:</label>
+                                <small class="text-center">{{this._id}}</small>
+                                <input type="text" class="form-control" id="username{{@index}}" name="username"
+                                    placeholder="Enter username" value="{{this.user}}">
+                            </div>
 
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label for="email{{@index}}">Email:</label>
-                            <input type="email" class="form-control" id="email{{@index}}" placeholder="Enter email"
-                                value="{{this.email}}">
-                        </div>
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email{{@index}}">Email:</label>
+                                <input type="email" class="form-control" id="email{{@index}}" name="email"
+                                    placeholder="Enter email" value="{{this.email}}">
+                            </div>
 
-                        <!-- Date -->
-                        <div class="form-group">
-                            <label for="email{{@index}}">Membership Date:</label>
-                            <form action="#">
-                            <input type="date" value="2024-04-11" data-date-format="mm/dd/yyyy">
-                        </form>
-                        </div>
-                        
-
+                            <!-- Date -->
+                            <div class="form-group">
+                                <label for="date{{@index}}">Membership Date:</label>
+                                <input type="date" class="form-control" id="date{{@index}}" name="membershipDate"
+                                    value="2024-04-11" data-date-format="mm/dd/yyyy">
+                            </div>
 
                             <!-- Card content -->
-                            <p class="card-text">You can edit all the fields by clicking <strong>Update</strong> or delete by clicking <strong>Delete</strong></p>
-                            <a href="#" class="btn btn-danger">Delete</a>
-                            <a href="#" class="btn btn-primary">Update</a>
+                            <p class="card-text">You can edit all the fields by clicking <strong>Update</strong> or
+                                delete by clicking <strong>Delete</strong></p>
+                            <a href="/admin/deleteVendor/{{this.id}}" class="btn btn-danger">Delete</a>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
+
             {{/each}}
         </div>
     </div>
