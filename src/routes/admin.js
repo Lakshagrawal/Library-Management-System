@@ -152,7 +152,7 @@ router.post("/updateUser/:id", async (req, res) => {
 router.post("/updateVendor/:id", async (req, res) => {
     const vendorId = req.params.id;
     const { username, email, category, membershipDate } = req.body;
-    console.log(req.body)
+    // console.log(req.body)
     try {
         // Find the vendor by ID and update the fields
         await vendor.findByIdAndUpdate(vendorId, {
@@ -183,7 +183,7 @@ router.get("/logout",async(req,res)=>{
 
 // admin singup
 router.post("/adminsignup",async(req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const {pass,user} = req.body;
     if(!pass || !user ){
         res.redirect("/user/registration")

@@ -44,7 +44,7 @@ router.post("/usersignup", async (req, res) => {
     // user is registre for now 6th months
     expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
 
-    console.log(req.body);
+    // console.log(req.body);
 
     if (!email || !pass || !user) {
         // console.log("hello")
@@ -53,7 +53,7 @@ router.post("/usersignup", async (req, res) => {
     else {
         try {
             const usersdb = await User.findOne({ user: user });
-            console.log(usersdb)
+            // console.log(usersdb)
             if (usersdb) {
                 return res.redirect("/user/registration?error=UsernameTaken");
             }
