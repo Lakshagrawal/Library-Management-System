@@ -57,7 +57,7 @@
                             <div class="form-group">
                                 <label for="date{{@index}}">Membership Date:</label>
                                 <input type="date" class="form-control" id="date{{@index}}"
-                                    name="membershipDate{{@index}}" value="2024-04-11" data-date-format="mm/dd/yyyy">
+                                    name="membershipDate{{@index}}" value="{{#if this.expireDate}}{{formatDate this.expireDate}}{{else}}2024-04-11{{/if}}" data-date-format="mm/dd/yyyy">
                             </div>
 
                             <!-- Card content -->

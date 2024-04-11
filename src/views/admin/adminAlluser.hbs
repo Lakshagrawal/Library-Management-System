@@ -44,14 +44,14 @@
                             <!-- Date -->
                             <div class="form-group">
                                 <label for="date{{@index}}">Membership Date:</label>
-                                <input type="date" class="form-control" id="date{{@index}}" name="membershipDate"
-                                    value="2024-04-11" data-date-format="mm/dd/yyyy">
+                                <input type="date" class="form-control" id="date{{@index}}"
+                                    name="membershipDate{{@index}}" value="{{#if this.expireDate}}{{formatDate this.expireDate}}{{else}}2024-04-11{{/if}}" data-date-format="mm/dd/yyyy">
                             </div>
 
                             <!-- Card content -->
                             <p class="card-text">You can edit all the fields by clicking <strong>Update</strong> or
                                 delete by clicking <strong>Delete</strong></p>
-                            <a href="/admin/deleteVendor/{{this.id}}" class="btn btn-danger">Delete</a>
+                            <a href="/admin/deleteUser/{{this.id}}" class="btn btn-danger">Delete</a>
                             <button type="submit" class="btn btn-primary">Update</button>
                         </div>
                     </div>
