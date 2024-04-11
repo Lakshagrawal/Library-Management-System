@@ -18,6 +18,7 @@
         </div>
     </div>
 
+    
     <div class="container ">
 
         <h1 class="text-center">All Cart Items of Vendor: {{vendorname}}</h1>
@@ -51,6 +52,7 @@
                     <small class="card-title" id="itemid">item: {{this._id}}</small>
                 </div>
                 {{/each}}
+                
                 {{#if vendorid}}
                     <small class="container">vendor:</small>
                     <small class="container" id="vendorid">{{vendorid}}</small>
@@ -66,18 +68,17 @@
                 <div class="card flex mx-2">
                     <div class="card-body text-center">
                         <div class="cart-items my-2">
-                            <div class="d-flex flex-column cart-items mx-2">
+                            <div class="d-flex flex-column cart-items mx-2" id="cartItemsContainer">
                                 <!-- Cart items will be dynamically added here -->
                             </div>
                         </div>
                         <strong>
-                            <p class="cart-total text-center mt-3 ">Total: $0.00</p>
+                            <p class="cart-total text-center mt-3" id="cartTotal">Total: $0.00</p>
                         </strong>
                     </div>
                 </div>
             </div>
         </div>
-
 
         {{#if Checkout}}
         <div class="container d-flex flex-column my-4">
@@ -86,32 +87,98 @@
         {{/if}}
     </div>
 
-
-
-
-
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        
-        let vendorid = document.getElementById("vendorid").textContent;
-        const quantityDropdowns = document.querySelectorAll('.quantity-dropdown');
-        
-        quantityDropdowns.forEach(dropdown => {
-            dropdown.addEventListener('change', function () {
-                // Get selected quantity
-                const selectedQuantity = parseInt(dropdown.value);
-                // Get price of the product
-                const priceElement = dropdown.parentElement.querySelector('.card-text');
-                const price = parseFloat(priceElement.textContent.replace('Price: $', ''));
-                // Calculate total price
-                const totalPrice = selectedQuantity * price;
-                // Update total price in the UI
-                const totalPriceElement = dropdown.parentElement.querySelector('.total-price');
-                totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+        // Retrieve cart items from localStorage
+        let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+        // Display cart items and calculate total
+        displayCartItems();
+
+        function displayCartItems() {
+            // Get the cart items container element
+            const cartItemsContainer = document.getElementById("cartItemsContainer");
+            // Reset cart items container
+            cartItemsContainer.innerHTML = "";
+            // Iterate over the retrieved cart items and render them on the page
+            cartItems.forEach(item => {
+                const cartItem = document.createElement("div");
+                cartItem.classList.add("cart-item");
+                cartItem.classList.add("mx-2");
+                cartItem.innerHTML = `
+                    <p>${item.name}</p>
+                    <p>Quantity: ${item.quantity}</p>
+                    <p>Total: $${item.total.toFixed(2)}</p>
+                    <button class="btn btn-danger remove-from-cart">Remove</button>
+                    <hr>
+                `;
+                cartItemsContainer.appendChild(cartItem);
+            });
+
+            // Calculate and display the total price of all items in the cart
+            const cartTotal = document.getElementById("cartTotal");
+            const totalAmount = cartItems.reduce((total, item) => total + item.total, 0);
+            cartTotal.textContent = `Total: $${totalAmount.toFixed(2)}`;
+        }
+
+        // Event listener to remove item from the cart
+        document.getElementById("cartItemsContainer").addEventListener("click", function (event) {
+            if (event.target.classList.contains("remove-from-cart")) {
+                const itemToRemove = event.target.parentElement;
+                const priceToRemove = parseFloat(itemToRemove.querySelector("p:nth-child(3)").textContent.replace("Total: $", ""));
+                cartItems = cartItems.filter(item => item.total !== priceToRemove);
+                localStorage.setItem("cartItems", JSON.stringify(cartItems));
+                itemToRemove.remove();
+                // Recalculate and display the total price after removing an item
+                displayCartItems();
+            }
+        });
+        const vendorid = document.getElementById("vendorid").textContent;
+        document.addEventListener("DOMContentLoaded", function () {
+            const vendorName = document.getElementById("vendorName");
+            const itemsContainer = document.getElementById("itemsContainer");
+
+            vendorName.textContent = "{{vendorname}}";
+
+            // Event listener for quantity change
+            itemsContainer.addEventListener('change', function (event) {
+                const selectedOption = event.target;
+                if (selectedOption.classList.contains('quantity-dropdown')) {
+                    const selectedQuantity = parseInt(selectedOption.value);
+                    const priceElement = selectedOption.parentElement.querySelector('.card-text');
+                    const price = parseFloat(priceElement.textContent.replace('Price: $', ''));
+                    const totalPriceElement = selectedOption.parentElement.querySelector('.total-price');
+                    const totalPrice = selectedQuantity * price;
+                    totalPriceElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+                }
+            });
+            
+
+            // Event listener for add to cart button
+            itemsContainer.addEventListener('click', function (event) {
+                if (event.target.classList.contains('add-to-cart')) {
+                    const product = event.target.parentElement;
+                    const productName = product.querySelector(".card-title").textContent;
+                    const productPrice = parseFloat(product.querySelector(".card-text").textContent.replace("Price: $", ""));
+                    const quantity = parseInt(product.querySelector(".quantity-dropdown").value);
+                    const totalPrice = productPrice * quantity;
+                    const itemid = product.querySelector("#itemid").textContent;
+                    const cartItem = {
+                        name: productName,
+                        price: productPrice,
+                        quantity: quantity,
+                        total: totalPrice,
+                        id: itemid,
+                        vendorid: vendorid,
+                    };
+                    cartItems.push(cartItem);
+                    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+                    displayCartItems();
+                }
             });
         });
+        
         document.addEventListener("DOMContentLoaded", function () {
             const addToCartButtons = document.querySelectorAll(".add-to-cart");
 
@@ -147,53 +214,7 @@
                 });
             });
         });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            // Retrieve cart items from localStorage
-            let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-
-            // Get the cart items container element
-            const cartItemsContainer = document.querySelector(".cart-items");
-            // Iterate over the retrieved cart items and render them on the page
-            cartItems.forEach(item => {
-                const cartItem = document.createElement("div");
-                cartItem.classList.add("cart-item");
-                cartItem.classList.add("mx-2");
-                cartItem.innerHTML = `
-                <p>${item.name}</p>
-                <p>Quantity: ${item.quantity}</p>
-                <p>Total: $${item.total.toFixed(2)}</p>
-                <button class="btn btn-danger remove-from-cart">Remove</button>
-                <hr>
-
-            `;
-                cartItemsContainer.appendChild(cartItem);
-            });
-
-            // Calculate and display the total price of all items in the cart
-            const cartTotal = document.querySelector(".cart-total");
-            const totalAmount = cartItems.reduce((total, item) => total + item.total, 0);
-            cartTotal.textContent = `Total: $${totalAmount.toFixed(2)}`;
-
-            // Add event listener to remove item from the cart
-            cartItemsContainer.addEventListener("click", function (event) {
-                if (event.target.classList.contains("remove-from-cart")) {
-                    const itemToRemove = event.target.parentElement;
-                    const priceToRemove = parseFloat(itemToRemove.querySelector("p:nth-child(3)").textContent.replace("Total: $", ""));
-                    const updatedCartItems = cartItems.filter(item => item.total !== priceToRemove);
-                    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
-                    itemToRemove.remove();
-
-                    // Recalculate and display the total price after removing an item
-                    const newTotalAmount = updatedCartItems.reduce((total, item) => total + item.total, 0);
-                    cartTotal.textContent = `Total: $${newTotalAmount.toFixed(2)}`;
-                }
-            });
-        });
-
     </script>
-
-
 </body>
 
 </html>
