@@ -17,6 +17,7 @@ const Vendor = new mongoose.Schema({
         }
 
     }],
+    mobile:{type:Number},
     category:{type:String,required:true},
     expireDate: {type:Date}
 })
