@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken")
 const cookieParser = require("cookie-parser")
-const User = require('../models/admin');
+const admin = require('../models/admin');
 
 const verifyAdmin = async(req,res,next)=>{
     try{
-        const token = await req.cookies.usertoken;
+        const token = await req.cookies.admintoken;
 
         if(!token){
             res.write(`

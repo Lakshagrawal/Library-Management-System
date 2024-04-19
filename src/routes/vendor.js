@@ -22,17 +22,19 @@ router.use(bodyParser.urlencoded({
 router.get("/", async (req, res) => {
     const token = await req.cookies.vendortoken;
     if (!token) {
-        res.render("vendorlogin");
+        res.render("vendor/vendorlogin");
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('vendorhome', { id: verifyUser._id });
+        res.render('vendor/vendorhome', { id: verifyUser._id });
     }
 
 })
 
+
 router.get("/registration", async (req, res) => {
-    res.render('vendorsign');
+    const error = req.query.error;
+    res.render('vendor/vendorsign', { error: error });
 })
 
 
@@ -56,7 +58,7 @@ router.get("/allItems/:id", verifyVendor, async (req, res) => {
         // console.log(allItems)
 
         // console.log("Items:", allItems);
-        res.render("vendorAllItems", { items: allItems })
+        res.render("vendor/vendorAllItems", { items: allItems })
     } catch (error) {
         console.log(error)
     }
@@ -66,7 +68,7 @@ router.get("/allItems/:id", verifyVendor, async (req, res) => {
 router.post("/deleteItem", verifyVendor, async (req, res) => {
     const vendorId = req.query.vendorId; // Accessing the vendorId query parameter
     const itemId = req.query.itemId; // Accessing the itemId query parameter
-    console.log(vendorId, " vendor ", itemId)
+    // console.log(vendorId, " vendor ", itemId)
     try {
         const vendordata = await vendor.findById(vendorId);
 
@@ -74,13 +76,13 @@ router.post("/deleteItem", verifyVendor, async (req, res) => {
             return res.status(404).json({ error: 'Vendor not found' });
         }
 
-        console.log(vendordata)
+        // console.log(vendordata)
         const itemIndex = vendordata.items.findIndex(item => item._id.toString() === itemId);
 
         if (itemIndex === -1) {
             return res.status(404).json({ error: 'Item not found' });
         }
-        console.log("item index "+itemIndex)
+        // console.log("item index "+itemIndex)
         vendordata.items.splice(itemIndex, 1); // Remove the item from the items array
         // console.log(object)
         await vendordata.save(); // Save the updated vendor document
@@ -99,22 +101,33 @@ router.get("/logout", async (req, res) => {
 })
 
 
-// singup
+// singup (new id of the vendor)
 router.post("/vendorsignup", async (req, res) => {
     // console.log(req.body);
     const { email, pass, user, category } = req.body;
+    const expireDate = new Date();
+    // vendor is registre for now 6th months
+    expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
+
     if (!email || !pass || !category || !user) {
-        res.redirect("/vendor/registration")
+        res.redirect("/vendor/registration?error=MissingFields")
     }
     else {
         try {
-            const newUser = new vendor({
+            const vendordb = await vendor.findOne({user:user});
+            if (vendordb) {
+                return res.redirect("/vendor/registration?error=UsernameTaken");
+            }
+
+            const newVendor = new vendor({
                 email,
                 pass,
                 user,
-                category
+                category,
+                expireDate
             });
-            await newUser.save();
+
+            await newVendor.save();
             return res.redirect('/vendor/')
         }
         catch (err) {
@@ -172,7 +185,7 @@ router.post("/vendorsignin", async (req, res) => {
 // Done
 router.get("/addItems/:id", verifyVendor, async (req, res) => {
     const id = req.params.id; // Accessing the id parameter from the URL
-    res.render("vendorAddItems", { id: id });
+    res.render("vendor/vendorAddItems", { id: id });
 })
 
 router.get("/transactions", verifyVendor, async (req, res) => {
@@ -181,14 +194,14 @@ router.get("/transactions", verifyVendor, async (req, res) => {
     // console.log(verifyUser)
 
     if (!token) {
-        res.render("vendorlogin");
+        res.render("vendor/vendorlogin");
     }
     else {
         try {
             // Transaction schema define kar na hai 
             const vendorTransaction = await items.find({ vendorid: verifyUser._id });
             const id = req.params.id; // Accessing the id parameter from the URL
-            res.render("vendortransaction", {items:vendorTransaction});
+            res.render("vendor/vendortransaction", {items:vendorTransaction});
         } catch (error) {
             console.log(error)
         }
@@ -243,6 +256,27 @@ router.post("/addItems/:id", verifyVendor, upload.single('img'), async (req, res
     }
 })
 
+
+// Define a route for updating the status of items
+router.post('/updateStatus/:itemId', async (req, res) => {
+    const { itemId } = req.params;
+    const { status } = req.body;
+    // console.log(req.body)
+    try {
+        // Find the item by ID and update its status
+        const updatedItem = await items.findByIdAndUpdate(itemId, { status: status }, { new: true });
+
+        if (!updatedItem) {
+            return res.status(404).json({ error: 'Item not found' });
+        }
+
+        // Return the updated item
+        res.json(updatedItem);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 
 
 

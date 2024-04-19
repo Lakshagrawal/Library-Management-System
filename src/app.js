@@ -17,8 +17,17 @@ app.set('view engine','hbs')
 app.set('views',path.join(__dirname,'/views'))
 hbs.handlebars.registerHelper('eq', function(a,b) {
     return a===b;
-  })
+})
 
+hbs.handlebars.registerHelper('formatDate', function(dateString) {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+    // console.log(year,month,day)
+    return `${year}-${month}-${day}`;
+
+})
 
 // static file use 
 app.use('/static',express.static(path.join(__dirname,'../public')));
