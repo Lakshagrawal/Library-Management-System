@@ -73,15 +73,27 @@ router.post("/usersignup", async (req, res) => {
     }
 })
 
-router.get("/categories/:categ", async (req, res) => {
-    const categorie = req.params.categ;
+// router.get("/categories/:categ", async (req, res) => {
+//     const categorie = req.params.categ;
 
-    const vendordata = await vendor.find({ category: categorie });
+//     const vendordata = await vendor.find({ category: categorie });
+//     if (!vendordata) {
+//         return res.status(404).json({ error: 'No Category found' });
+//     }
+//     // console.log(vendordata)
+//     res.render("user/usercategories", { vendordata: vendordata, categorie: categorie })
+// })
+
+//new route for categories 
+router.get("/categories", async (req, res) => {
+    // const categorie = req.params.categ;
+
+    const vendordata = await vendor.find();
     if (!vendordata) {
         return res.status(404).json({ error: 'No Category found' });
     }
     // console.log(vendordata)
-    res.render("user/usercategories", { vendordata: vendordata, categorie: categorie })
+    res.render("user/usercategories", { vendordata: vendordata, categorie: "All Vendor" })
 })
 
 router.get("/allItems/:id", verifUser, async (req, res) => {
