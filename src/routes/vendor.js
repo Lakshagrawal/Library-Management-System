@@ -22,11 +22,11 @@ router.use(bodyParser.urlencoded({
 router.get("/", async (req, res) => {
     const token = await req.cookies.vendortoken;
     if (!token) {
-        res.render("vendorlogin");
+        res.render("vendor/vendorlogin");
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('vendorhome', { id: verifyUser._id });
+        res.render('vendor/vendorhome', { id: verifyUser._id });
     }
 
 })
@@ -34,7 +34,7 @@ router.get("/", async (req, res) => {
 
 router.get("/registration", async (req, res) => {
     const error = req.query.error;
-    res.render('vendorsign', { error: error });
+    res.render('vendor/vendorsign', { error: error });
 })
 
 
@@ -58,7 +58,7 @@ router.get("/allItems/:id", verifyVendor, async (req, res) => {
         // console.log(allItems)
 
         // console.log("Items:", allItems);
-        res.render("vendorAllItems", { items: allItems })
+        res.render("vendor/vendorAllItems", { items: allItems })
     } catch (error) {
         console.log(error)
     }
@@ -185,7 +185,7 @@ router.post("/vendorsignin", async (req, res) => {
 // Done
 router.get("/addItems/:id", verifyVendor, async (req, res) => {
     const id = req.params.id; // Accessing the id parameter from the URL
-    res.render("vendorAddItems", { id: id });
+    res.render("vendor/vendorAddItems", { id: id });
 })
 
 router.get("/transactions", verifyVendor, async (req, res) => {
@@ -194,14 +194,14 @@ router.get("/transactions", verifyVendor, async (req, res) => {
     // console.log(verifyUser)
 
     if (!token) {
-        res.render("vendorlogin");
+        res.render("vendor/vendorlogin");
     }
     else {
         try {
             // Transaction schema define kar na hai 
             const vendorTransaction = await items.find({ vendorid: verifyUser._id });
             const id = req.params.id; // Accessing the id parameter from the URL
-            res.render("vendortransaction", {items:vendorTransaction});
+            res.render("vendor/vendortransaction", {items:vendorTransaction});
         } catch (error) {
             console.log(error)
         }

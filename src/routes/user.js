@@ -23,16 +23,16 @@ router.use(bodyParser.urlencoded({
 router.get("/", async (req, res) => {
     const token = await req.cookies.usertoken;
     if (!token) {
-        res.render("userlogin");
+        res.render("user/userlogin");
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('userhome', { id: verifyUser._id });
+        res.render('user/userhome', { id: verifyUser._id });
     }
 })
 router.get("/registration", async (req, res) => {
     const error = req.query.error;
-    res.render('usersign', { error: error });
+    res.render('user/usersign', { error: error });
 })
 
 
@@ -81,7 +81,7 @@ router.get("/categories/:categ", async (req, res) => {
         return res.status(404).json({ error: 'No Category found' });
     }
     // console.log(vendordata)
-    res.render("usercategories", { vendordata: vendordata, categorie: categorie })
+    res.render("user/usercategories", { vendordata: vendordata, categorie: categorie })
 })
 
 router.get("/allItems/:id", verifUser, async (req, res) => {
@@ -103,7 +103,7 @@ router.get("/allItems/:id", verifUser, async (req, res) => {
 
 
     // console.log(category)
-    res.render("userAllItems", { items: allItems, category: category })
+    res.render("user/userAllItems", { items: allItems, category: category })
 })
 
 
@@ -133,7 +133,7 @@ router.get("/userCart", verifUser, async (req, res) => {
         // console.log(allItems.length)
 
         // res.status(200).json({ items: allItems });
-        return res.render("userCart", { items: allItems, vendorid: vendorid, vendorname: vendorUser.user })
+        return res.render("user/userCart", { items: allItems, vendorid: vendorid, vendorname: vendorUser.user })
 
     } catch (error) {
         console.error(error);
@@ -195,12 +195,12 @@ router.get("/logout", async (req, res) => {
 
 router.get("/cart", verifUser, async (req, res) => {
 
-    res.render("userCart", { Checkout: true })
+    res.render("user/userCart", { Checkout: true })
 
 })
 
 router.get("/usertransection", async (req, res) => {
-    res.render("usertransection")
+    res.render("user/usertransection")
 
 })
 
@@ -213,7 +213,7 @@ router.get("/userorderstatus", verifUser, async (req, res) => {
         const userItems = await items.find({ user: userid });
 
         // Render the userorderstatus view and pass the userItems data to it
-        res.render("userorderstatus", { items: userItems });
+        res.render("user/userorderstatus", { items: userItems });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -238,7 +238,7 @@ router.post("/payment", async (req, res) => {
 })
 
 router.get("/successpayment", async (req, res) => {
-    res.render("successpayment");
+    res.render("user/successpayment");
 
 })
 
@@ -284,7 +284,7 @@ router.post("/orderStatus", async (req, res) => {
 
 
 router.get("/successpayment", async (req, res) => {
-    res.render("successpayment");
+    res.render("user/successpayment");
 
 })
 
