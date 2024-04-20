@@ -17,9 +17,10 @@ const Vendor = new mongoose.Schema({
         }
 
     }],
-    mobile:{type:Number},
-    category:{type:String,required:true},
-    expireDate: {type:Date}
+    mobile:{type:Number,require:true},
+    category:{type:String},
+    expireDate: {type:Date},
+    is_verfied:{type:Number,require:true}
 })
 
 
