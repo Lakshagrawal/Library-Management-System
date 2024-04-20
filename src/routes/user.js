@@ -250,25 +250,21 @@ router.get("/userorderstatus", verifUser, async (req, res) => {
 })
 
 
-router.post("/payment", async (req, res) => {
-    // Process payment...
+// router.post("/payment", async (req, res) => {
+//     // Process payment...
 
-    // Send response with JavaScript code to clear localStorage
-    const clearLocalStorageScript = `
-        <script>
-            localStorage.clear();
-            // Redirect the user to a success page or perform any other action
-            window.location.href = "/user/successpayment";
-        </script>
-    `;
-    res.send(clearLocalStorageScript);
+//     // Send response with JavaScript code to clear localStorage
+//     const clearLocalStorageScript = `
+//         <script>
+//             localStorage.clear();
+//             // Redirect the user to a success page or perform any other action
+//             window.location.href = "/user/successpayment";
+//         </script>
+//     `;
+//     res.send(clearLocalStorageScript);
 
-})
+// })
 
-router.get("/successpayment", async (req, res) => {
-    res.render("user/successpayment");
-
-})
 
 
 
@@ -296,7 +292,7 @@ router.post("/usertransection", verifUser, async (req, res) => {
                     items: {
                         name: item.itemname,
                         quantity: item.quantity,
-                        total: item.total,
+                        total: item.bidAmt,
                         itemsid: item.itemid,
                     },
                     status: "Pending", // Assuming status is always "Pending" for new items
@@ -316,7 +312,7 @@ router.post("/usertransection", verifUser, async (req, res) => {
                 await newItem.save();
             }
 
-            res.status(200).json({ message: 'New items created successfully' });
+            res.redirect("/user/successpayment")
         } else {
             throw new Error('Items array is missing or invalid in the request body');
         }
@@ -327,7 +323,14 @@ router.post("/usertransection", verifUser, async (req, res) => {
 });
 
 
-router.get("/successpayment", async (req, res) => {
+router.get("/successpayment",verifUser, async (req, res) => {
+    const token = req.cookies.usertoken;
+    const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+
+    let userCart = await cart.findOne({ user: verifyUser._id });
+    userCart.items = [];
+    await userCart.save();
+
     res.render("user/successpayment");
 
 })
@@ -339,9 +342,9 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
         const token = req.cookies.usertoken;
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
         // const userdata = await User.findOne({ _id: verifyUser._id });
-
+        // console.log(req.body)
         if (req.body) {
-            const { name, price, quantity, total, itemid, vendorid, userid } = req.body;
+            const { name, price, quantity, total, itemid, vendorid, userid, bidAmt } = req.body;
 
             // Check if there is already a cart for the user
             let userCart = await cart.findOne({ user: verifyUser._id });
@@ -355,9 +358,10 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
                         itemid: itemid,
                         price: price,
                         quantity: quantity,
-                        total: total,
                         vendorid: vendorid,
-                        userid: userid
+                        userid: userid,
+                        bidAmt: bidAmt,
+                        total: total,
                     }]
                 });
             } else {
@@ -373,6 +377,7 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
                         quantity: quantity,
                         total: total,
                         vendorid: vendorid,
+                        bidAmt: bidAmt,
                         userid: userid
                     });
                 }
