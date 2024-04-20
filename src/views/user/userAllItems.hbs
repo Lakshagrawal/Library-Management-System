@@ -18,27 +18,27 @@
         </div>
     </div>
     <div class="container mt-4">
-        <h1 class="mb-4">Vendor All Items</h1>
+        <h1 class="mb-5 text-center">Vendor All Items</h1>
         <div class="row">
-            {{#each items}}
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <img src="{{this.img}}" class="card-img-top" alt="{{this.itemname}}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{this.itemname}}</h5>
-                        <p class="card-text">Price: {{this.price}}</p>
-                        {{#if this.data}}
-                        <a href="/user/userCart/?vendorid={{this.data}}&itemid={{this._id}}" class="btn btn-success">Add
-                            to Cart</a>
-                        {{else}}
-                        <p>Vendor ID not provided</p>
-                        {{/if}}
-                        {{!-- <a href="/user/userCart/?vendorid={{vendorid}}&itemid={{this._id}}"
-                            class="btn btn-success">Add to Cart</a> --}}
+                {{#each items}}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <img src="{{this.img}}" class="card-img-top" alt="{{this.itemname}}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.itemname}}</h5>
+                            <p class="card-text">Price: {{this.price}}</p>
+                            {{#if this.data}}
+                            <a href="/user/userCart/?vendorid={{this.data}}&itemid={{this._id}}" class="btn btn-success">Add
+                                to Cart</a>
+                            {{else}}
+                            <p>Vendor ID not provided</p>
+                            {{/if}}
+                            {{!-- <a href="/user/userCart/?vendorid={{vendorid}}&itemid={{this._id}}"
+                                class="btn btn-success">Add to Cart</a> --}}
+                        </div>
                     </div>
                 </div>
-            </div>
-            {{/each}}
+                {{/each}}
         </div>
 
     </div>
