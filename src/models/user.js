@@ -9,7 +9,8 @@ const User = new mongoose.Schema({
     email:{type:String,require:true},
     pass:{type:String,required:true},
     token:{type:String},
-    expireDate: {type:Date}
+    expireDate: {type:Date},
+    is_verfied:{type:Number}
 })
 
 
