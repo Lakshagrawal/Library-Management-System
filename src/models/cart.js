@@ -14,7 +14,8 @@ const cart = new mongoose.Schema({
         },
         quantity:{type:Number,required:true},
         vendorid:{type:String,required:true},
-        total:{type:Number}
+        total:{type:Number},
+        bidAmt:{type:Number,required:true},
 
     }],
 })
