@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container d-flex justify-content-between mt-4">
+        <div class="col-lg-2 col-md-4">
+            <a href="/user" class="btn btn-primary btn-lg btn-block mb-3">Back</a>
+        </div>
+        <div class="col-lg-2 col-md-4">
+            <a href="/user/logout" class="btn btn-primary btn-lg btn-block mb-3">Logout</a>
+        </div>
+    </div>
+
+
+    <div class="container my-4  d-flex ">
+        <div class="container">
+            <h1 class="text-center">ALL the Cart Items of User: </h1>
+
+
+            <div class="row text-center justify-content-center my-5">
+                <div class="col-md-4">
+                    {{#each items}}
+                    <div class="card my-3">
+                        {{!-- <img src="{{this.img}}" class="card-img-top" alt="{{this.itemname}}"> --}}
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.itemname}}</h5>
+                            <p class="card-text">Price: ${{this.price}}</p>
+                            <select class="form-select quantity-dropdown">
+                                <option value="1">1</option>
+                            </select>
+                            <p class="total-price">Total: ${{this.price}}</p>
+                            <a class="btn btn-danger add-to-cart" href="/user/removeCartitem/?vendorid={{this.data}}&itemid={{this.itemid}}">Remove</a>
+                        </div>
+                        <small class="card-title " id="itemid">{{this.itemid}}</small>
+                    </div>
+                    {{/each}}
+
+                    {{#if vendorid}}
+                    <small class="container">vendor:</small>
+                    <small class="container" id="vendorid">{{vendorid}}</small>
+                    {{/if}}
+                </div>
+            </div>
+
+
+            <div class="container mt-4">
+                {{#if Checkout}}
+                <div class="container d-flex flex-column my-4">
+                    <a href="/user/usertransection" class="btn btn-primary text-center">Proceed to Checkout</a>
+                </div>
+                {{else}}
+                 <div class="container text-info text-center justify-content-center my-5">
+                    <h4>There is no Item in the Cart</h4>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
