@@ -31,11 +31,11 @@
                     <img src="{{this.img}}" class="card-img-top" alt="{{this.itemname}}">
                     <div class="card-body">
                         <h5 class="card-title">{{this.itemname}}</h5>
-                        <p class="card-text">Price: ${{this.price}}</p>
+                        <p class="card-text">Price: ₹{{this.price}}</p>
                         <select class="form-select quantity-dropdown">
                             <option value="1">1</option>
                         </select>
-                        <p class="total-price">Total: ${{this.price}}</p>
+                        <input class="form-control my-2 text-center bid-input" type="text" placeholder="Bid: ₹{{this.price}}" aria-label="default input example">
                         <button class="btn btn-primary add-to-cart">Add to Cart</button>
                     </div>
                     {{!-- <small class="card-title invisible" id="itemid">{{this._id}}</small> --}}
@@ -71,12 +71,23 @@
                 button.addEventListener("click", function () {
                     const product = button.parentElement.parentElement;
                     const productName = product.querySelector(".card-title").textContent;
-                    const productPrice = parseFloat(product.querySelector(".card-text").textContent.replace("Price: $", ""));
+                    const productPrice = parseFloat(product.querySelector(".card-text").textContent.replace("Price: ₹", ""));
                     const quantity = parseInt(product.querySelector(".quantity-dropdown").value);
                     const totalPrice = productPrice * quantity;
                     const itemid = document.getElementById("itemid").textContent;
                     const userid = document.getElementById("userid").textContent;
                     const vendorid = document.getElementById("vendorid").textContent;
+
+                    // Extract bid from input field
+                    const bidInput = product.querySelector(".bid-input");
+                    let bidAmount = bidInput.value.trim(); // Get the trimmed value
+
+                    // Check if bidAmount is a valid number, if not, set it to totalPrice
+                    if (isNaN(parseFloat(bidAmount))) {
+                        bidAmount = totalPrice;
+                    } else {
+                        bidAmount = parseFloat(bidAmount);
+                    }
 
                     // Create cart item object
                     const cartItem = {
@@ -87,6 +98,7 @@
                         itemid: itemid,
                         vendorid: vendorid,
                         userid: userid, // Add userid to cart item
+                        bidAmt: bidAmount // Add bid amount to cart item
                     };
 
                     // POST cart item to the API endpoint
