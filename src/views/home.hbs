@@ -12,7 +12,7 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Event Management System</a>
+            <a class="navbar-brand" href="#">Buy and Sell System</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -29,15 +29,24 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/admin">Admin</a>
                     </li>
-                   
+
                 </ul>
-                
+
             </div>
         </div>
     </nav>
+    <div class="container mt-4">
+        <a href="/user">
+            <img src="/static/images/buy.jpg" class="rounded float-start" alt="Buy.png">
+        </a>
+        <a href="/vendor">
+            <img src="/static/images/sell.jpg" class="rounded float-end" alt="Sell.png">
+        </a>
+    </div>
+
     <div class="container mt-1">
         {{!-- <img src="/static/images/mbook 1.jpg" class="img-fluid" alt="photo 1"> --}}
-        <img src="/static/images/home.jpg" class="img-fluid my-3" alt="photo 1">
+        {{!-- <img src="/static/images/home.jpg" class="img-fluid my-3" alt="photo 1"> --}}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
