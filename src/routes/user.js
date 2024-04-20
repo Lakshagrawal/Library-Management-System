@@ -73,15 +73,27 @@ router.post("/usersignup", async (req, res) => {
     }
 })
 
-router.get("/categories/:categ", async (req, res) => {
-    const categorie = req.params.categ;
+// router.get("/categories/:categ", async (req, res) => {
+//     const categorie = req.params.categ;
 
-    const vendordata = await vendor.find({ category: categorie });
+//     const vendordata = await vendor.find({ category: categorie });
+//     if (!vendordata) {
+//         return res.status(404).json({ error: 'No Category found' });
+//     }
+//     // console.log(vendordata)
+//     res.render("user/usercategories", { vendordata: vendordata, categorie: categorie })
+// })
+
+//new route for categories 
+router.get("/categories", async (req, res) => {
+    // const categorie = req.params.categ;
+
+    const vendordata = await vendor.find();
     if (!vendordata) {
         return res.status(404).json({ error: 'No Category found' });
     }
     // console.log(vendordata)
-    res.render("user/usercategories", { vendordata: vendordata, categorie: categorie })
+    res.render("user/usercategories", { vendordata: vendordata, categorie: "All Vendor" })
 })
 
 router.get("/allItems/:id", verifUser, async (req, res) => {
@@ -111,6 +123,10 @@ router.get("/userCart", verifUser, async (req, res) => {
     const vendorid = req.query.vendorid;
     const itemid = req.query.itemid;
     // console.log(vendorid)
+
+    const token = await req.cookies.usertoken;
+    const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
+
     try {
         const vendorUser = await vendor.findById(vendorid);
         // console.log(vendorUser)
@@ -133,7 +149,7 @@ router.get("/userCart", verifUser, async (req, res) => {
         // console.log(allItems.length)
 
         // res.status(200).json({ items: allItems });
-        return res.render("user/userCart", { items: allItems, vendorid: vendorid, vendorname: vendorUser.user })
+        return res.render("user/userCart", { items: allItems, vendorid: vendorid, vendorname: vendorUser.user, userid: verifyUser._id })
 
     } catch (error) {
         console.error(error);
@@ -194,15 +210,27 @@ router.get("/logout", async (req, res) => {
 
 
 router.get("/cart", verifUser, async (req, res) => {
+    try {
+        const token = req.cookies.usertoken;
+        const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
 
-    res.render("user/userCart", { Checkout: true })
+        // Check if there is already a cart for the user
+        let userCart = await cart.findOne({ user: verifyUser._id });
+        
+        // Get the size (length) of the items array
+        const itemsSize = userCart.items.length;
+        let checkout = false;
+        if(itemsSize >= 1) checkout = true;
+
+        res.render("user/userAllCartItem", { Checkout: checkout, items: userCart.items, itemsSize:itemsSize })
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 
 })
 
-router.get("/usertransection", async (req, res) => {
-    res.render("user/usertransection")
-
-})
 
 router.get("/userorderstatus", verifUser, async (req, res) => {
     try {
@@ -243,29 +271,45 @@ router.get("/successpayment", async (req, res) => {
 })
 
 
-router.post("/orderStatus", async (req, res) => {
+
+router.get("/usertransection", verifUser, async (req, res) => {
+    res.render("user/usertransection")
+
+})
+
+router.post("/usertransection", verifUser, async (req, res) => {
     // console.log(req.body);
+    const {userName, mobileNum,address,city,pincode,paymentMethod,state} = req.body;
 
     try {
         const token = req.cookies.usertoken;
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
-        const userdata = await User.findOne({ _id: verifyUser._id });
-
+        // const userdata = await User.findOne({ _id: verifyUser._id });
         if (req.body) {
             // console.log(req.body);
-
+            const cartData = await cart.findOne({user:verifyUser._id})
+            // console.log(verifyUser._id)
             // Iterate over the list of items in req.body and save each item individually
-            for (const item of req.body) {
+            for (const item of cartData.items) {
                 const newItem = new items({
                     user: verifyUser._id, // Assuming you want to associate the items with the user
                     items: {
-                        name: item.name,
+                        name: item.itemname,
                         quantity: item.quantity,
                         total: item.total,
-                        bookid: item.id,
+                        itemsid: item.itemid,
                     },
                     status: "Pending", // Assuming status is always "Pending" for new items
-                    vendorid: item.vendorid
+                    vendorid: item.vendorid,
+                    userInfo:{
+                        userName:userName,
+                        mobile:mobileNum,
+                        address:address,
+                        city:city,
+                        pincode:pincode,
+                        paymentMethod:paymentMethod,
+                        state:state,
+                    }
                 });
 
                 // Save the newItem object to the database
@@ -287,6 +331,92 @@ router.get("/successpayment", async (req, res) => {
     res.render("user/successpayment");
 
 })
+
+// Cart logic
+// Route for adding items to the cart
+router.post("/userAddtoCart", verifUser, async (req, res) => {
+    try {
+        const token = req.cookies.usertoken;
+        const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+        // const userdata = await User.findOne({ _id: verifyUser._id });
+
+        if (req.body) {
+            const { name, price, quantity, total, itemid, vendorid, userid } = req.body;
+
+            // Check if there is already a cart for the user
+            let userCart = await cart.findOne({ user: verifyUser._id });
+
+            if (!userCart) {
+                // If no cart exists, create a new cart entry
+                userCart = new cart({
+                    user: verifyUser._id,
+                    items: [{
+                        itemname: name,
+                        itemid: itemid,
+                        price: price,
+                        quantity: quantity,
+                        total: total,
+                        vendorid: vendorid,
+                        userid: userid
+                    }]
+                });
+            } else {
+
+                const existingItem = userCart.items.find(item => item.itemid === itemid);
+                // if there is same item in the database then we are not adding it 
+                if (!existingItem) {
+                    // If cart exists, add the new item to the existing cart
+                    userCart.items.push({
+                        itemname: name,
+                        itemid: itemid,
+                        price: price,
+                        quantity: quantity,
+                        total: total,
+                        vendorid: vendorid,
+                        userid: userid
+                    });
+                }
+
+            }
+
+            // Save the updated/created cart to the database
+            await userCart.save();
+
+            res.status(200).json({ message: 'Item(s) added to the cart successfully' });
+        } else {
+            throw new Error('Request body is missing or invalid');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.get("/removeCartitem", verifUser, async (req, res) => {
+    const { itemid } = req.query;
+    try {
+        const token = req.cookies.usertoken;
+        const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+        // const userdata = await User.findOne({ _id: verifyUser._id });
+        let userCart = await cart.findOne({ user: verifyUser._id });
+        // console.log(userCart.items.filter(item => item.itemid !== itemid))
+        // console.log(itemid)
+        if (userCart) {
+            // Remove the item from the cart
+            userCart.items = userCart.items.filter(item => item.itemid !== itemid);
+
+            // Save the updated cart
+            await userCart.save();  
+
+            res.redirect("/user/cart")
+        } else {
+            res.status(404).json({ error: 'Cart not found for the user' });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
 

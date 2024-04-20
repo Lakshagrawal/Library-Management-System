@@ -8,10 +8,19 @@ const items = new mongoose.Schema({
         name:{type:String},
         quantity:{type:Number},
         total:{type:Number},
-        bookid:{type:String}
+        itemsid:{type:String}
     },
     status:{type:String},
-    vendorid:{type:String}
+    vendorid:{type:String},
+    userInfo:{
+        userName:{type:String,required:true},
+        mobile:{type:Number,required:true},
+        address:{type:String},
+        city:{type:String},
+        pincode:{type:Number},
+        paymentMethod:{type:String},
+        state:{type:String},
+    },
 })
 
 

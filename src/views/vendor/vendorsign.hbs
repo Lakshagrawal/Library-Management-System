@@ -28,9 +28,6 @@
 
 </head>
 
-
-</head>
-
 <body id="top">
 
 
@@ -50,7 +47,6 @@
     <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Please fill in all the fields.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="alert alert-danger text-center" role="alert"> </div>
     {{else if (eq error 'UsernameTaken')}}
     <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Username is already taken.Please choose another one.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -82,32 +78,22 @@
             <h1 class="title text-center mt-4">VendorRegistration</h1>
             <div class="mb-3">
                 <label for="userId" class="form-label">User ID</label>
-                <input type="text" class="form-control" name="user" id="userId" aria-describedby="userIdHelp">
+                <input type="text" class="form-control" name="user" id="userId" aria-describedby="userIdHelp" required>
                 <div id="userIdHelp" class="form-text">Enter your user ID.</div>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email address</label>
-                <input type="email" name="email" id="email" class="form-control" aria-describedby="emailHelp">
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                <input type="email" name="email" id="email" class="form-control" aria-describedby="emailHelp" required>
+                <div id="emailHelp" class="form-text">We'll share your email with our trusted user.</div>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" name="pass" id="password" class="form-control">
+                <input type="password" name="pass" id="password" class="form-control" required>
             </div>
             <div class="mb-3">
-                <input type="hidden" name="category" id="category" value="">
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        Select Category
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" data-value="Catering">Catering</a></li>
-                        <li><a class="dropdown-item" href="#" data-value="Florist">Florist</a></li>
-                        <li><a class="dropdown-item" href="#" data-value="Decoration">Decoration</a></li>
-                        <li><a class="dropdown-item" href="#" data-value="Lighting">Lighting</a></li>
-                    </ul>
-                </div>
+                <label for="mobile" class="form-label">Mobile Number</label>
+                <input type="tel" name="mobile" id="mobile" class="form-control" aria-describedby="mobileHelp" required>
+                <div id="mobileHelp" class="form-text">Enter your mobile number.</div>
             </div>
             <button type="submit" class="btn btn-primary mt-3">Submit</button>
         </form>
@@ -119,11 +105,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('.dropdown-item').click(function () {
-                var category = $(this).data('value');
-                $('#category').val(category);
-                $('.btn-secondary').text(category); // Update dropdown button text
-            });
+            // No JavaScript code needed for this purpose
         });
     </script>
 
