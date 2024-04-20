@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Status</title>
+  <title>User Order Status</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <h2 class="text-center">Order Status</h2>
+    <h2 class="text-center">User Order Status</h2>
 
     <div class="table-responsive">
       <table class="table table-bordered">
@@ -31,8 +31,8 @@
           <tr>
             <th>Name</th>
             <th>Quantity</th>
-            <th>Total</th>
-            <th>Status</th>
+            <th>Your Bid</th>
+            <th>Order Status</th>
           </tr>
         </thead>
         <tbody>
@@ -40,7 +40,7 @@
           <tr>
             <td>{{this.items.name}}</td>
             <td>{{this.items.quantity}}</td>
-            <td>{{this.items.total}}</td>
+            <td>₹ {{this.items.total}}</td>
             <td>{{this.status}}</td>
           </tr>
           {{/each}}
