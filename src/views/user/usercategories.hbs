@@ -27,6 +27,23 @@
                         <h5 class="card-title">{{this.user}}</h5>
                         <p class="card-text">Email: {{this.email}}</p>
                         <p class="card-text">Mobile number: {{this.mobile}}</p>
+
+                        {{!-- dropdown menu --}}
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                All Items
+                            </button>
+                            <ul class="dropdown-menu">
+                                {{#if this.items}}
+                                    {{#each this.items}}
+                                    <li><a class="dropdown-item" href="/user/userCart/?vendorid={{../this._id}}&itemid={{this._id}}">{{this.itemname}}</a></li>
+                                    {{/each}}
+                                {{else}}
+                                    <li><a class="dropdown-item" href="#">No Items / Empty</a></li>
+                                {{/if}}
+                            </ul>
+                        </div>
                         <a href="/user/allItems/{{this._id}}" class="btn btn-primary">Shop Items</a>
                     </div>
                 </div>

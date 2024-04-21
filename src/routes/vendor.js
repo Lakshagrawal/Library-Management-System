@@ -5,7 +5,7 @@ const items = require('../models/items');
 const cookieParser = require("cookie-parser")
 const verifyVendor = require("../middleware/verifyVendor")
 const jwt = require("jsonwebtoken");
-
+const nodemailer = require("nodemailer")
 
 // use of json file in the router or || app file 
 router.use(express.json());
@@ -21,12 +21,13 @@ router.use(bodyParser.urlencoded({
 
 router.get("/", async (req, res) => {
     const token = await req.cookies.vendortoken;
+    const message = req.query.message;
     if (!token) {
-        res.render("vendor/vendorlogin");
+        res.render("vendor/vendorlogin",{message});
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('vendor/vendorhome', { id: verifyUser._id });
+        res.render('vendor/vendorhome', { id: verifyUser._id , message});
     }
 
 })
@@ -101,15 +102,49 @@ router.get("/logout", async (req, res) => {
 })
 
 
+// for send mail
+const sendVerifyMail = async(name,email,user_id)=>{
+    try {
+        const transporter = nodemailer.createTransport({
+            host:"smtp.gmail.com",
+            port: 587,
+            secure:false,
+            requireTLS:true,
+            auth:{
+                user:"lakagrawal144@gmail.com",
+                pass: process.env.GMAIL_KEY_SMTP
+            }
+        });
+
+        const mailOptions = {
+            from:"lakagrawal144@gmail.com",
+            to:email,
+            subject:"Here's your verification link for Vendor Registraion",
+            html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/vendor/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
+        }
+
+        transporter.sendMail(mailOptions,function(error,info){
+            if(error){
+                console.log(error);
+            }
+            else{
+                console.log("Email has been send :-", info.response);
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+} 
+
 // singup (new id of the vendor)
 router.post("/vendorsignup", async (req, res) => {
     // console.log(req.body);
-    const { email, pass, user, category } = req.body;
+    const { email, pass, user, mobile } = req.body;
     const expireDate = new Date();
     // vendor is registre for now 6th months
     expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
 
-    if (!email || !pass || !category || !user) {
+    if (!email || !pass || !mobile || !user) {
         res.redirect("/vendor/registration?error=MissingFields")
     }
     else {
@@ -123,11 +158,15 @@ router.post("/vendorsignup", async (req, res) => {
                 email,
                 pass,
                 user,
-                category,
-                expireDate
+                mobile,
+                expireDate,
+                is_verfied:0,
             });
 
-            await newVendor.save();
+            const vendorData = await newVendor.save();
+            // console.log(vendorData)
+            sendVerifyMail(req.body.user,req.body.email,vendorData._id)
+
             return res.redirect('/vendor/')
         }
         catch (err) {
@@ -136,6 +175,18 @@ router.post("/vendorsignup", async (req, res) => {
         }
     }
 })
+
+const verifyMail = async(req,res)=>{
+    try {
+        const updateInfo = await vendor.updateOne({_id:req.query.id},{$set:{is_verfied:1}});
+        // console.log(updateInfo);
+        return res.redirect("/vendor/")
+    } catch (error) {
+        console.log(error)
+    }
+}
+router.get("/verify",verifyMail);
+
 
 // login
 router.post("/vendorsignin", async (req, res) => {
@@ -155,17 +206,21 @@ router.post("/vendorsignin", async (req, res) => {
 
             if (pass == usersdb.pass) {
                 try {
-                    // this ==> User   value
-                    const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
-                    // console.log("lakshya", token);
-                    usersdb.token = token
-                    await usersdb.save();
-                    res.cookie('vendortoken', token);
-
+                    if(usersdb.is_verfied === 0){
+                        return res.redirect("/vendor?message=Please Verify User on Mail First.")
+                    }
+                    else{
+                        // this ==> User   value
+                        const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
+                        // console.log("lakshya", token);
+                        usersdb.token = token
+                        await usersdb.save();
+                        res.cookie('vendortoken', token);
+                        return res.redirect("/vendor")
+                    }
                 } catch (error) {
                     console.log("the error part" + error);
                 }
-                return res.redirect("/vendor")
             }
             else {
                 // Incorect user and password

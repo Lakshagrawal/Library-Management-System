@@ -7,11 +7,13 @@ const cart = require("../models/cart")
 const cookieParser = require("cookie-parser")
 const verifUser = require("../middleware/verifyUser")
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer")
 
 // use of json file in the router or || app file 
 router.use(express.json());
 router.use(cookieParser())
 const bodyParser = require("body-parser");
+const { rmSync } = require('fs')
 router.use(bodyParser.urlencoded({
     extended: true
 }))
@@ -22,12 +24,14 @@ router.use(bodyParser.urlencoded({
 
 router.get("/", async (req, res) => {
     const token = await req.cookies.usertoken;
+    const message = req.query.message;
+
     if (!token) {
-        res.render("user/userlogin");
+        res.render("user/userlogin",{message});
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('user/userhome', { id: verifyUser._id });
+        res.render('user/userhome', { id: verifyUser._id, message});
     }
 })
 router.get("/registration", async (req, res) => {
@@ -35,6 +39,39 @@ router.get("/registration", async (req, res) => {
     res.render('user/usersign', { error: error });
 })
 
+// for send mail
+const sendVerifyMail = async(name,email,user_id)=>{
+    try {
+        const transporter = nodemailer.createTransport({
+            host:"smtp.gmail.com",
+            port: 587,
+            secure:false,
+            requireTLS:true,
+            auth:{
+                user:"lakagrawal144@gmail.com",
+                pass: process.env.GMAIL_KEY_SMTP
+            }
+        });
+
+        const mailOptions = {
+            from:"lakagrawal144@gmail.com",
+            to:email,
+            subject:"Here's your verification link for User Registraion",
+            html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/user/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
+        }
+
+        transporter.sendMail(mailOptions,function(error,info){
+            if(error){
+                console.log(error);
+            }
+            else{
+                console.log("Email has been send :-", info.response);
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+} 
 
 // singup
 router.post("/usersignup", async (req, res) => {
@@ -49,6 +86,7 @@ router.post("/usersignup", async (req, res) => {
     if (!email || !pass || !user) {
         // console.log("hello")
         res.redirect("/user/registration?error=MissingFields")
+        // res.redirect("/user/registration?error=collegeEmailId")
     }
     else {
         try {
@@ -61,9 +99,14 @@ router.post("/usersignup", async (req, res) => {
                 email,
                 pass,
                 user,
-                expireDate
+                expireDate,
+                is_verfied:0,
+
             });
-            await newUser.save();
+            const userData = await newUser.save();
+            // console.log(userData)
+            sendVerifyMail(req.body.user,req.body.email,userData._id)
+
             return res.redirect('/user/')
         }
         catch (err) {
@@ -73,16 +116,17 @@ router.post("/usersignup", async (req, res) => {
     }
 })
 
-// router.get("/categories/:categ", async (req, res) => {
-//     const categorie = req.params.categ;
+const verifyMail = async(req,res)=>{
+    try {
+        const updateInfo = await User.updateOne({_id:req.query.id},{$set:{is_verfied:1}});
+        // console.log(updateInfo);
+        return res.redirect("/user/")
+    } catch (error) {
+        console.log(error)
+    }
+}
+router.get("/verify",verifyMail);
 
-//     const vendordata = await vendor.find({ category: categorie });
-//     if (!vendordata) {
-//         return res.status(404).json({ error: 'No Category found' });
-//     }
-//     // console.log(vendordata)
-//     res.render("user/usercategories", { vendordata: vendordata, categorie: categorie })
-// })
 
 //new route for categories 
 router.get("/categories", async (req, res) => {
@@ -139,14 +183,14 @@ router.get("/userCart", verifUser, async (req, res) => {
         // console.log(vendorUser)
         const desiredItem = vendorUser.items.find(item => item._id == itemid);
         // console.log(desiredItem)
-        const allItems = [{
+        const allItems = {
             _id: desiredItem._id,
             itemname: desiredItem.itemname,
             price: desiredItem.price,
             img: `data:${desiredItem.img.contentType};base64,${desiredItem.img.data.toString('base64')}`
-        }];
+        };
 
-        // console.log(allItems.length)
+        // console.log(allItems)
 
         // res.status(200).json({ items: allItems });
         return res.render("user/userCart", { items: allItems, vendorid: vendorid, vendorname: vendorUser.user, userid: verifyUser._id })
@@ -178,17 +222,22 @@ router.post("/usersignin", async (req, res) => {
 
             if (pass == usersdb.pass) {
                 try {
-                    // this ==> User   value
-                    const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
-                    // console.log("lakshya" , token);
-                    usersdb.token = token
-                    await usersdb.save();
-                    res.cookie('usertoken', token);
+                    if(usersdb.is_verfied === 0){
+                        return res.redirect("/user?message=Please Verify User on Mail First.")
+                    }
+                    else{
+                        // this ==> User   value
+                        const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
+                        // console.log("lakshya" , token);
+                        usersdb.token = token
+                        await usersdb.save();
+                        res.cookie('usertoken', token);
+                        return res.redirect("/user")
+                    }
 
                 } catch (error) {
                     console.log("the error part" + error);
                 }
-                return res.redirect("/user")
             }
             else {
                 // Incorect user and password
@@ -217,12 +266,18 @@ router.get("/cart", verifUser, async (req, res) => {
         // Check if there is already a cart for the user
         let userCart = await cart.findOne({ user: verifyUser._id });
         
+        // Check if userCart is null (no cart found for the user)
+        if (!userCart) {
+            // Handle the case when no cart is found
+            return res.render("user/userAllCartItem", { Checkout: false, items: [], itemsSize: 0 });
+        }
+        
         // Get the size (length) of the items array
-        const itemsSize = userCart.items.length;
         let checkout = false;
-        if(itemsSize >= 1) checkout = true;
+        let itemsSize = userCart.items.length;
+        if(userCart.items.length >= 1) checkout = true;
 
-        res.render("user/userAllCartItem", { Checkout: checkout, items: userCart.items, itemsSize:itemsSize })
+        return res.render("user/userAllCartItem", { Checkout: checkout, items: userCart.items, itemsSize:itemsSize })
 
     } catch (error) {
         console.error('Error:', error);
@@ -338,11 +393,11 @@ router.get("/successpayment",verifUser, async (req, res) => {
 // Cart logic
 // Route for adding items to the cart
 router.post("/userAddtoCart", verifUser, async (req, res) => {
+    // console.log(req.body)
     try {
         const token = req.cookies.usertoken;
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
         // const userdata = await User.findOne({ _id: verifyUser._id });
-        // console.log(req.body)
         if (req.body) {
             const { name, price, quantity, total, itemid, vendorid, userid, bidAmt } = req.body;
 
@@ -351,7 +406,7 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
 
             if (!userCart) {
                 // If no cart exists, create a new cart entry
-                userCart = new cart({
+                userCart = await new cart({
                     user: verifyUser._id,
                     items: [{
                         itemname: name,
@@ -383,11 +438,12 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
                 }
 
             }
+            // console.log(userCart)
 
             // Save the updated/created cart to the database
-            await userCart.save();
+            const userCartData  = await userCart.save();
 
-            res.status(200).json({ message: 'Item(s) added to the cart successfully' });
+            return res.status(200).json({ message: 'Item(s) added to the cart successfully' });
         } else {
             throw new Error('Request body is missing or invalid');
         }

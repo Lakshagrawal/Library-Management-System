@@ -39,7 +39,8 @@ const verifyVendor = async(req,res,next)=>{
             next();
         }
         else{
-            res.status(404).json({message:"No entry to post your blog"});
+            return res.status(404).json({message:"Please login in again there is some problem"});
+            // res.status(404).json({message:"No entry to post your blog"});
         }
     }
     catch(err){
