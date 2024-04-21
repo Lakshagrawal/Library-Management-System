@@ -23,16 +23,21 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg fs-5 navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="#">Buy and Sell System</a>
+            <a class="navbar-brand" href="/">Buy and Sell System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse justify-content-start" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link text-center" href="/">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/user/registration">Sign Up</a>
+                        <a class="nav-link text-center" href="/user/registration">Sign Up</a>
                     </li>
                 </ul>
             </div>
@@ -60,10 +65,12 @@
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary" style="background: linear-gradient(to right, #8f43b0, #2196f3); border: none;">Continue</button>
                     </div>
+                    <a class="btn btn-danger mt-3" href="/user/registration" role="button">Don't have a account!</a>
                 </form>
 
                 {{#if message}}
-                  <p class="text-center mt-3">{{message}}</p>
+                    <p class="text-center small text-danger mt-3">{{message}}</p>
+                    <p class="text-center small text-danger mt-3">**Check junk/spam mail**</p>
                 {{/if}}
             </div>
             </div>
