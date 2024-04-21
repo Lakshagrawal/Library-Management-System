@@ -120,7 +120,7 @@ const sendVerifyMail = async(name,email,user_id)=>{
             from:"lakagrawal144@gmail.com",
             to:email,
             subject:"Here's your verification link for Vendor Registraion",
-            html:"<p> Hii " + name + ', Please click here to <a href= "http://127.0.0.1:3000/vendor/verify?id='+user_id+'">  Verify </a> your mail.</p>'
+            html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/vendor/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
         }
 
         transporter.sendMail(mailOptions,function(error,info){
@@ -164,7 +164,7 @@ router.post("/vendorsignup", async (req, res) => {
             });
 
             const vendorData = await newVendor.save();
-            console.log(vendorData)
+            // console.log(vendorData)
             sendVerifyMail(req.body.user,req.body.email,vendorData._id)
 
             return res.redirect('/vendor/')

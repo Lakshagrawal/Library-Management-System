@@ -57,7 +57,7 @@ const sendVerifyMail = async(name,email,user_id)=>{
             from:"lakagrawal144@gmail.com",
             to:email,
             subject:"Here's your verification link for User Registraion",
-            html:"<p> Hii " + name + ', Please click here to <a href= "http://127.0.0.1:3000/user/verify?id='+user_id+'">  Verify </a> your mail.</p>'
+            html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/user/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
         }
 
         transporter.sendMail(mailOptions,function(error,info){
@@ -119,7 +119,7 @@ router.post("/usersignup", async (req, res) => {
 const verifyMail = async(req,res)=>{
     try {
         const updateInfo = await User.updateOne({_id:req.query.id},{$set:{is_verfied:1}});
-        console.log(updateInfo);
+        // console.log(updateInfo);
         return res.redirect("/user/")
     } catch (error) {
         console.log(error)
@@ -393,7 +393,7 @@ router.get("/successpayment",verifUser, async (req, res) => {
 // Cart logic
 // Route for adding items to the cart
 router.post("/userAddtoCart", verifUser, async (req, res) => {
-    console.log(req.body)
+    // console.log(req.body)
     try {
         const token = req.cookies.usertoken;
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
@@ -438,7 +438,7 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
                 }
 
             }
-            console.log(userCart)
+            // console.log(userCart)
 
             // Save the updated/created cart to the database
             const userCartData  = await userCart.save();
