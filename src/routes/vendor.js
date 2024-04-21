@@ -17,7 +17,7 @@ router.use(bodyParser.urlencoded({
 
 
 
-// --->  /user
+// --->  /vendor
 
 router.get("/", async (req, res) => {
     const token = await req.cookies.vendortoken;
@@ -207,7 +207,7 @@ router.post("/vendorsignin", async (req, res) => {
             if (pass == usersdb.pass) {
                 try {
                     if(usersdb.is_verfied === 0){
-                        return res.redirect("/vendor?message=Please Verify User on Mail First.")
+                        return res.redirect("/vendor?message=Please Verify Vendor on Mail First.")
                     }
                     else{
                         // this ==> User   value
