@@ -38,11 +38,11 @@ app.get('/', (req, res) => {
     res.render('home', { title: 'Welcome to my Express App' });
 });
 
-app.use(session({
-    secret:process.env.SESSION_KEY || "hellothisissessionkey",
-    resave: false,
-    saveUninitialized: true
-}));
+// app.use(session({
+//     secret:process.env.SESSION_KEY || "hellothisissessionkey",
+//     resave: false,
+//     saveUninitialized: true
+// }));
 
 // use of routes
 const vendor = require("./routes/vendor")
@@ -60,7 +60,7 @@ app.use((err, req, res, next) => {
 });
 
 try{
-    const dbURL =  "mongodb://localhost:27017/bookstore";  
+    const dbURL =  process.env.SERVER_DB_KEY || "mongodb://localhost:27017/bookstore";  
     // console.log(dbURL);
 
     mongoose.connect(dbURL).then(()=>{
