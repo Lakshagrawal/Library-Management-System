@@ -51,9 +51,9 @@
       button.addEventListener('click', function () {
         // Get the item ID associated with this remove button
         let itemId = this.parentElement.querySelector('.item-id').textContent.trim();
-        console.log(itemId)
+        //console.log(itemId)
         let vendorId = window.location.pathname.split('/')[3]; // Assuming the vendor ID is the 4th segment of the URL
-        console.log(vendorId)
+        //console.log(vendorId)
         // Send delete request to the server
         let url = `/vendor/deleteItem?vendorId=${vendorId}&itemId=${itemId}`;
 
