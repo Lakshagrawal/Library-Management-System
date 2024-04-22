@@ -27,8 +27,8 @@
                         <div class="card-body">
                             <h5 class="card-title">{{this.itemname}}</h5>
                             <p class="card-text">Price: {{this.price}}</p>
-                            {{#if this.data}}
-                            <a href="/user/userCart/?vendorid={{this.data}}&itemid={{this._id}}" class="btn btn-success">Add
+                            {{#if this.vendorid}}
+                            <a href="/user/userCart/?vendorid={{this.vendorid}}&itemid={{this._id}}" class="btn btn-success">Add
                                 to Cart</a>
                             {{else}}
                                 <p>Vendor ID not provided</p>
