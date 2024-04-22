@@ -22,8 +22,10 @@ router.use(bodyParser.urlencoded({
 router.get("/", async (req, res) => {
     const token = await req.cookies.vendortoken;
     const message = req.query.message;
+    const popup = req.query.popup;
+
     if (!token) {
-        res.render("vendor/vendorlogin",{message});
+        res.render("vendor/vendorlogin",{message,popup});
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
@@ -161,13 +163,14 @@ router.post("/vendorsignup", async (req, res) => {
                 mobile,
                 expireDate,
                 is_verfied:0,
+                is_admin:1
             });
 
             const vendorData = await newVendor.save();
             // console.log(vendorData)
             sendVerifyMail(req.body.user,req.body.email,vendorData._id)
 
-            return res.redirect('/vendor/')
+            return res.redirect('/vendor?popup=Please check your email inbox/junk')
         }
         catch (err) {
             console.log(err);

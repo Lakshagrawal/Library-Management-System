@@ -25,9 +25,10 @@ router.use(bodyParser.urlencoded({
 router.get("/", async (req, res) => {
     const token = await req.cookies.usertoken;
     const message = req.query.message;
+    const popup = req.query.popup;
 
     if (!token) {
-        res.render("user/userlogin",{message});
+        res.render("user/userlogin",{message,popup});
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
@@ -36,7 +37,8 @@ router.get("/", async (req, res) => {
 })
 router.get("/registration", async (req, res) => {
     const error = req.query.error;
-    res.render('user/usersign', { error: error });
+    const popup = req.query.popup;
+    res.render('user/usersign', { error: error, popup});
 })
 
 // for send mail
@@ -85,7 +87,7 @@ router.post("/usersignup", async (req, res) => {
 
     if (!email || !pass || !user) {
         // console.log("hello")
-        res.redirect("/user/registration?error=MissingFields")
+        res.redirect("/user/registration?popup=Please fill in all the fields")
         // res.redirect("/user/registration?error=collegeEmailId")
     }
     else {
@@ -93,7 +95,7 @@ router.post("/usersignup", async (req, res) => {
             const usersdb = await User.findOne({ user: user });
             // console.log(usersdb)
             if (usersdb) {
-                return res.redirect("/user/registration?error=UsernameTaken");
+                return res.redirect("/user/registration?popup=Username is already taken. Please choose another one");
             }
             const newUser = new User({
                 email,
@@ -101,13 +103,13 @@ router.post("/usersignup", async (req, res) => {
                 user,
                 expireDate,
                 is_verfied:0,
-
+                is_admin:1
             });
             const userData = await newUser.save();
             // console.log(userData)
             sendVerifyMail(req.body.user,req.body.email,userData._id)
 
-            return res.redirect('/user/')
+            return res.redirect('/user?popup=Please check your email inbox/junk')
         }
         catch (err) {
             console.log(err);
@@ -120,7 +122,7 @@ const verifyMail = async(req,res)=>{
     try {
         const updateInfo = await User.updateOne({_id:req.query.id},{$set:{is_verfied:1}});
         // console.log(updateInfo);
-        return res.redirect("/user/")
+        return res.redirect("/user")
     } catch (error) {
         console.log(error)
     }
@@ -143,6 +145,7 @@ router.get("/categories", async (req, res) => {
 router.get("/allItems/:id", verifUser, async (req, res) => {
     const id = req.params.id; // Accessing the id parameter from the URL
     const vendorUser = await vendor.findOne({ _id: id });
+    
     if (!vendorUser) {
         return res.status(404).json({ error: 'Vendor not found' });
     }
