@@ -9,8 +9,8 @@ const Vendor = new mongoose.Schema({
     token:{type:String},
     items:[{
         itemname:{type:String,required:true},
-        price:{type:String,required:true},
-        // image:{type:String,required:true}
+        price:{type:Number,required:true},
+        desc:{type:String},
         img:{ 
             data: Buffer,
             contentType: String
@@ -20,6 +20,7 @@ const Vendor = new mongoose.Schema({
     mobile:{type:Number,require:true},
     category:{type:String},
     expireDate: {type:Date},
+    is_admin:{type:Number},
     is_verfied:{type:Number,require:true}
 })
 
