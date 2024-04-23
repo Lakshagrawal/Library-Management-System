@@ -14,7 +14,8 @@
     <style>
         /* Hover effect */
         .nav-link:hover {
-            color: #020202; /* White text color on hover */
+            color: #020202;
+            /* White text color on hover */
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
             border-radius: 1rem;
         }
@@ -45,6 +46,16 @@
         </div>
     </nav>
 
+    {{!-- Popup --}}
+    {{#if popup}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="text-center">
+            {{popup}}
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{/if}}
+
     <!-- Login Form -->
     <div class="container mt-5">
         <div class="row justify-content-center ">
@@ -60,14 +71,14 @@
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" placeholder="Enter Your Password" name="pass"
-                                    id="pass" required>
+                                <input type="password" class="form-control" placeholder="Enter Your Password"
+                                    name="pass" id="pass" required>
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary"
-                                    style="background: linear-gradient(to right, #8f43b0, #2196f3); border: none;">Continue</button>
+                                    style="background: linear-gradient(to right, #8f43b0, #2196f3); border: none;">Log In</button>
                             </div>
-                            <a class="btn btn-danger mt-3" href="/vendor/registration" role="button">Don't have a account!</a>
+                            <a class="btn btn-danger mt-3" href="/vendor/registration" role="button">Create an account!</a>
                         </form>
 
                         {{#if message}}

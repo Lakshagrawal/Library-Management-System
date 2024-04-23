@@ -48,13 +48,23 @@
         </div>
     </nav>
     
+    {{!-- Popup --}}
+    {{#if popup}}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="text-center">
+                {{popup}}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {{/if}}
+    
     {{#if error}}
         {{#if (eq error 'MissingFields')}}
         <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Please fill in all the fields.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {{else if (eq error 'UsernameTaken')}}
-        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Username is already taken.Please choose another one.
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Username is already taken. Please choose another one.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {{/if}}
