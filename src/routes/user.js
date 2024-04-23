@@ -36,13 +36,14 @@ router.get("/", async (req, res) => {
     const token = await req.cookies.usertoken;
     const message = req.query.message;
     const popup = req.query.popup;
+    const popupSuccess = req.query.popupSuccess;
 
     if (!token) {
-        res.render("user/userlogin", { message, popup });
+        res.render("user/userlogin", { message, popup, popupSuccess });
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('user/userhome', { id: verifyUser._id, message, popup });
+        res.render('user/userhome', { id: verifyUser._id, message, popup, popupSuccess });
     }
 })
 router.get("/registration", async (req, res) => {
@@ -57,7 +58,7 @@ const sendVerifyMail = async (name, email, user_id) => {
     try {
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
-            port: 587,
+            port: process.env.MAIL_PORT || 587,
             secure: false,
             requireTLS: true,
             auth: {
@@ -70,15 +71,17 @@ const sendVerifyMail = async (name, email, user_id) => {
             from: "lakagrawal144@gmail.com",
             to: email,
             subject: "Here's your verification link for User Registration",
-            html: `<p> Hii ${name},</p> <br> <p>Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/user/verify?id=${user_id}">  Verify </a> your mail.</p> <br> <p>Regards,</p> <p>Lakshya Agrawal</p>`
+            html: `<p> Hii ${name},</p> <p>Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/user/verify?id=${user_id}">  Verify </a> your mail.</p> <p>Regards,</p> <p>Lakshya Agrawal</p>`
         }
 
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log(error);
+                return res.status(500).json({ message: "Failed to send password reset email" });
             }
             else {
                 console.log("Email has been send :-", info.response);
+                return res.status(200).json({ message: "Password reset instructions sent to your email" });
             }
         })
     } catch (error) {
@@ -134,7 +137,7 @@ router.post("/usersignup", limiter, async (req, res) => {
             // console.log(userData)
             sendVerifyMail(req.body.user, req.body.email, userData._id)
 
-            return res.redirect('/user?popup=Please check your email inbox/junk')
+            return res.redirect('/user?popupSuccess=Please check your email inbox/junk')
         }
     }
     catch (err) {
@@ -518,7 +521,130 @@ router.get("/removeCartitem", verifUser, async (req, res) => {
     }
 });
 
+// for send mail
+const forgetPasswordVerifyMail = async (name, email, user_id,resetToken) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: process.env.MAIL_PORT || 587,
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: "lakagrawal144@gmail.com",
+                pass: process.env.GMAIL_KEY_SMTP
+            }
+        });
 
+        const mailOptions = {
+            from: "lakagrawal144@gmail.com",
+            to: email,
+            subject: "Password Reset Request",
+            html: ` <p> Hii ${name},</p>
+                    <p>You are receiving this email because you (or someone else) have requested the reset of the password for your account.</p>  
+                    <p>Please click on the following link to reset your password:</p>
+                    <p><a href="https://${process.env.WEBSITE_DOMAIN_NAME}/user/resetpassword/${resetToken}">Reset Password</a></p>
+                    <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`
+        };
 
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+                return res.status(500).json({ message: "Failed to send password reset email" });
+            }
+            else {
+                console.log("Email sent for forget password: " + info.response + "User_id is: " + userName);
+                // console.log("Email has been send :-", info.response);
+                return res.status(200).json({ message: "Password reset instructions sent to your email" });
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+router.get("/forgetpassword", async(req, res)=>{
+    const message = req.query.message;
+    const popup = req.query.popup;
+    const popupSuccess = req.query.popupSuccess;
+    return res.render("user/forgetPassword",{popup,message,popupSuccess});
+})
+// Route for handling forget password request
+router.post("/forgetpassword", async (req, res) => {
+    const userName = req.body.user_id;
+    // console.log(userName)
+    try {
+        // Check if the user with the provided email exists
+        const userData = await User.findOne({ user:userName });
+
+        if (!userData) {
+            return res.redirect(`/user/forgetpassword?popup=User with this ${userName} does not exist`)
+            // return res.status(404).json({ message: "User with this ** does not exist" });
+        }
+
+        // Generate a unique token for password reset
+        const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        // Set token expiration time (e.g., 1 hour)
+        const tokenExpiration = Date.now() + (5*3600000); // 1 hour in milliseconds
+
+        // Update user document with reset token and token expiration time
+        userData.resetPasswordToken = resetToken;
+        userData.resetPasswordExpires = tokenExpiration;
+        const userEmail = userData.email;
+        const userSaveData = await userData.save();
+        // console.log(userEmail)
+        // console.log(userSaveData)
+
+        // Send an email with password reset instructions
+        forgetPasswordVerifyMail(userName,userEmail,userSaveData._id,resetToken);
+        return res.redirect('/user/forgetpassword?popupSuccess=Password reset link has been sent successfully. Please check your email inbox/junk.')
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Route for handling password reset
+router.get('/resetpassword/:resetToken', async(req, res) => {
+    // Get the reset token from the request parameters
+    const resetToken = req.params.resetToken;
+    const message = req.query.message;
+    const popup = req.query.popup;
+    const popupSuccess = req.query.popupSuccess;
+    
+    return res.render("user/resetpassword",{popup,message,popupSuccess,resetToken});
+
+});
+
+router.post("/resetpassword/:token", async (req, res) => {
+    const resetToken = req.params.token;
+    const { newPassword } = req.body;
+
+    try {
+        // Find user by reset token and check if the token is not expired
+        // $gt means that database date and time must greater that the current time 
+        const userData = await User.findOne({ resetPasswordToken: resetToken, resetPasswordExpires: { $gt: Date.now() } });
+
+        if (!userData) {
+            return res.redirect('/user/forgetpassword?popup=Invalid or reset token has expired ')
+            // return res.status(400).json({ message: "Invalid or expired reset token" });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update user's password and clear reset token fields
+        userData.pass = hashedPassword;
+        userData.resetPasswordToken = undefined;
+        userData.resetPasswordExpires = undefined;
+        
+        await userData.save();
+
+        return res.redirect("/user?popupSuccess=Password reset successfully. Now login")
+        // return res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Server error" });
+    }
+});
 
 module.exports = router;

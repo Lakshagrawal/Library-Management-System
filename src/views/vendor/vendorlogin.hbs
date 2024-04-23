@@ -85,10 +85,12 @@
                                     name="pass" id="pass" required>
                             </div>
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary"
-                                    style="background: linear-gradient(to right, #8f43b0, #2196f3); border: none;">Log In</button>
+                                <button type="submit" class="btn btn-primary" style="background: linear-gradient(to right, #8f43b0, #2196f3); border: none;">Log In</button>
                             </div>
-                            <a class="btn btn-danger mt-3" href="/vendor/registration" role="button">Create an account!</a>
+                            <div class="mt-3">
+                                <p><a href="/vendor/forgetpassword" class="link-underline-light mt-3">Forgot Password?</a></p>
+                            </div>
+                            <a class="btn btn-danger mt-1" href="/vendor/registration" role="button">Create an account!</a>
                         </form>
 
                         {{#if message}}
