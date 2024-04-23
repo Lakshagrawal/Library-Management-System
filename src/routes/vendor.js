@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt');
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10, // limit each IP to 10 requests per windowMs
-    message: "Too many requests from this IP, please try again later."
+    message: "<h1>Too many requests from this IP, please try again later.</h1>"
 });
 
 // use of json file in the router or || app file 
@@ -418,7 +418,7 @@ router.post("/forgetpassword", async (req, res) => {
     // console.log(userName)
     try {
         // Check if the user with the provided email exists
-        const userData = await User.findOne({ user:userName });
+        const userData = await vendor.findOne({ user:userName });
 
         if (!userData) {
             return res.redirect(`/vendor/forgetpassword?popup=Vendor with this ${userName} does not exist`)
@@ -457,7 +457,7 @@ router.get('/resetpassword/:resetToken', async(req, res) => {
     const popup = req.query.popup;
     const popupSuccess = req.query.popupSuccess;
     
-    return res.render("user/resetpassword",{popup,message,popupSuccess,resetToken});
+    return res.render("vendor/resetpassword",{popup,message,popupSuccess,resetToken});
 
 });
 
@@ -468,10 +468,10 @@ router.post("/resetpassword/:token", async (req, res) => {
     try {
         // Find user by reset token and check if the token is not expired
         // $gt means that database date and time must greater that the current time 
-        const userData = await User.findOne({ resetPasswordToken: resetToken, resetPasswordExpires: { $gt: Date.now() } });
+        const userData = await vendor.findOne({ resetPasswordToken: resetToken, resetPasswordExpires: { $gt: Date.now() } });
 
         if (!userData) {
-            return res.redirect('/user/forgetpassword?popup=Invalid or reset token has expired ')
+            return res.redirect('/vendor/forgetpassword?popup=Invalid or reset token has expired ')
             // return res.status(400).json({ message: "Invalid or expired reset token" });
         }
 
@@ -484,7 +484,7 @@ router.post("/resetpassword/:token", async (req, res) => {
         userData.resetPasswordExpires = undefined;
         await userData.save();
 
-        return res.redirect("/user?popupSuccess=Password reset successfully. Now login")
+        return res.redirect("/vendor?popupSuccess=Password reset successfully. Now login")
         // return res.status(200).json({ message: "Password reset successfully" });
     } catch (error) {
         console.log(error);
