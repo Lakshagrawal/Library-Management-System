@@ -6,6 +6,16 @@ const cookieParser = require("cookie-parser")
 const verifyVendor = require("../middleware/verifyVendor")
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer")
+const { validationResult } = require('express-validator');
+const rateLimit = require('express-rate-limit');
+const bcrypt = require('bcrypt');
+
+// Rate limiting middleware
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // limit each IP to 10 requests per windowMs
+    message: "Too many requests from this IP, please try again later."
+});
 
 // use of json file in the router or || app file 
 router.use(express.json());
@@ -29,25 +39,27 @@ router.get("/", async (req, res) => {
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('vendor/vendorhome', { id: verifyUser._id , message});
+        res.render('vendor/vendorhome', { id: verifyUser._id , message,popup});
     }
 
 })
 
-
 router.get("/registration", async (req, res) => {
     const error = req.query.error;
-    res.render('vendor/vendorsign', { error: error });
+    const message = req.query.message;
+    const popup = req.query.popup;
+    res.render('vendor/vendorsign', { error,message,popup });
 })
 
 
-router.get("/allItems/:id", verifyVendor, async (req, res) => {
-    const id = req.params.id; // Accessing the id parameter from the URL
+router.get("/allItems/:vendorid", verifyVendor, async (req, res) => {
+    const vendorid = req.params.vendorid; // Accessing the id parameter from the URL
     try {
-        const vendorUser = await vendor.findOne({ _id: id });
+        const vendorUser = await vendor.findOne({ _id: vendorid });
         // console.log(vendorUser)
         if (!vendorUser) {
-            return res.status(404).json({ error: 'Vendor not found' });
+            return res.redirect("/vendor?popup=Vendor not found")
+            // return res.status(404).json({ error: 'Vendor not found' });
         }
         // const allitems = vendorUser.items;
         // Extract items from the vendor
@@ -76,17 +88,14 @@ router.post("/deleteItem", verifyVendor, async (req, res) => {
         const vendordata = await vendor.findById(vendorId);
 
         if (!vendordata) {
+            // return res.redirect("/vendor?popup=Vendor not found")
             return res.status(404).json({ error: 'Vendor not found' });
         }
 
         // console.log(vendordata)
-        const itemIndex = vendordata.items.findIndex(item => item._id.toString() === itemId);
-
-        if (itemIndex === -1) {
-            return res.status(404).json({ error: 'Item not found' });
-        }
+        const newItem = vendordata.items.filter(item=> item._id.toString() !== itemId);
         // console.log("item index "+itemIndex)
-        vendordata.items.splice(itemIndex, 1); // Remove the item from the items array
+        vendordata.items = newItem;// Remove the item from the items array
         // console.log(object)
         await vendordata.save(); // Save the updated vendor document
 
@@ -121,8 +130,9 @@ const sendVerifyMail = async(name,email,user_id)=>{
         const mailOptions = {
             from:"lakagrawal144@gmail.com",
             to:email,
-            subject:"Here's your verification link for Vendor Registraion",
-            html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/vendor/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
+            subject:"Here's your verification link for Vendor Registration",
+            // html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/vendor/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
+            html:`<p> Hii ${name},</p> <br> <p>Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/vendor/verify?id=${user_id}">  Verify </a> your mail.</p> <br> <p>Regards,</p> <p>Lakshya Agrawal</p>`
         }
 
         transporter.sendMail(mailOptions,function(error,info){
@@ -139,26 +149,39 @@ const sendVerifyMail = async(name,email,user_id)=>{
 } 
 
 // singup (new id of the vendor)
-router.post("/vendorsignup", async (req, res) => {
+router.post("/vendorsignup",limiter, async (req, res) => {
     // console.log(req.body);
-    const { email, pass, user, mobile } = req.body;
-    const expireDate = new Date();
-    // vendor is registre for now 6th months
-    expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
-
-    if (!email || !pass || !mobile || !user) {
-        res.redirect("/vendor/registration?error=MissingFields")
-    }
-    else {
-        try {
+    try {
+        // Input validation
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        const { email, pass, user, mobile } = req.body;
+        const expireDate = new Date();
+        // vendor is registre for now 6th months
+        expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
+        
+        if (!email || !pass || !mobile || !user) {
+        res.redirect("/vendor/registration?popup=Please fill in all the fields.")
+        }
+        else {
             const vendordb = await vendor.findOne({user:user});
             if (vendordb) {
-                return res.redirect("/vendor/registration?error=UsernameTaken");
+                return res.redirect("/vendor/registration?popup=Username is already taken. Please choose another one.");
             }
+
+            // Check if email ends with "@iitp.ac.in"
+            if (!email.endsWith("@iitp.ac.in")) {
+                return res.redirect("/user/registration?popup=Only IITP email addresses are allowed for registration.");
+            }
+            
+            // Hash password
+            const hashedPassword = await bcrypt.hash(pass, 10);
 
             const newVendor = new vendor({
                 email,
-                pass,
+                pass: hashedPassword,
                 user,
                 mobile,
                 expireDate,
@@ -171,11 +194,11 @@ router.post("/vendorsignup", async (req, res) => {
             sendVerifyMail(req.body.user,req.body.email,vendorData._id)
 
             return res.redirect('/vendor?popup=Please check your email inbox/junk')
-        }
-        catch (err) {
-            console.log(err);
-            res.status(501).send("server error")
-        }
+        } 
+    }
+    catch (err) {
+        console.log(err);
+        res.status(501).send("Server error")
     }
 })
 
@@ -192,25 +215,33 @@ router.get("/verify",verifyMail);
 
 
 // login
-router.post("/vendorsignin", async (req, res) => {
+router.post("/vendorsignin",limiter, async (req, res) => {
     // console.log(req.body);
     const { pass, user } = req.body;
 
     if (!user || !pass) {
-        res.redirect("/vendor")
+        res.redirect("/vendor?popup=Please fill in all the fields")
     }
     else {
         try {
             const { user, pass } = req.body;
             const usersdb = await vendor.findOne({ user: user });
             if (!usersdb) {
-                return res.status(404).json({ error: "Please Enter Correct User and Password", "server": "ok" });
+                return res.redirect('/user?popup=Please Enter Correct User and Password')
+                // return res.status(404).json({ error: "Please Enter Correct User and Password", "server": "ok" });
             }
 
-            if (pass == usersdb.pass) {
+            const isPasswordValid = await bcrypt.compare(pass, usersdb.pass);
+            if(!isPasswordValid) {
+                return res.redirect('/vendor?popup=Please Enter Correct User and Password');
+            }
+            else{
                 try {
                     if(usersdb.is_verfied === 0){
                         return res.redirect("/vendor?message=Please Verify Vendor on Mail First.")
+                    }
+                    else if(usersdb.is_admin === 0){
+                        return res.redirect("/vendor?popup=You have been blocked by Admin.")
                     }
                     else{
                         // this ==> User   value
@@ -225,10 +256,6 @@ router.post("/vendorsignin", async (req, res) => {
                     console.log("the error part" + error);
                 }
             }
-            else {
-                // Incorect user and password
-                return res.status(400).json({ error: "Invalid Crediantial", server: "ok" });
-            }
         }
         catch (err) {
             console.log(err);
@@ -241,28 +268,22 @@ router.post("/vendorsignin", async (req, res) => {
 
 
 // Done
-router.get("/addItems/:id", verifyVendor, async (req, res) => {
-    const id = req.params.id; // Accessing the id parameter from the URL
-    res.render("vendor/vendorAddItems", { id: id });
+router.get("/addItems/:vendorid", verifyVendor, async (req, res) => {
+    const vendorid = req.params.vendorid; // Accessing the id parameter from the URL
+    res.render("vendor/vendorAddItems", { id: vendorid });
 })
+
 
 router.get("/transactions", verifyVendor, async (req, res) => {
     const token = await req.cookies.vendortoken;
     const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
     // console.log(verifyUser)
-
-    if (!token) {
-        res.render("vendor/vendorlogin");
-    }
-    else {
-        try {
-            // Transaction schema define kar na hai 
-            const vendorTransaction = await items.find({ vendorid: verifyUser._id });
-            const id = req.params.id; // Accessing the id parameter from the URL
-            res.render("vendor/vendortransaction", {items:vendorTransaction});
-        } catch (error) {
-            console.log(error)
-        }
+    try {
+        // Transaction schema define kar na hai 
+        const vendorTransaction = await items.find({ vendorid: verifyUser._id });
+        res.render("vendor/vendortransaction", {items:vendorTransaction});
+    } catch (error) {
+        console.log(error)
     }
 })
 
@@ -279,16 +300,22 @@ const upload = multer({ storage: storage });
 exports.uploadFile = upload.single('img'); // 'img' is the name attribute of the file input field in the form
 
 
-router.post("/addItems/:id", verifyVendor, upload.single('img'), async (req, res) => {
-
-    const id = req.params.id; // Accessing the id parameter from the URL
+router.post("/addItems/:vendorid", verifyVendor, upload.single('img'), async (req, res) => {
     const { itemname, price } = req.body;
+    const token = await req.cookies.vendortoken;
+    const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
+
+    const vendorid = verifyUser._id; // Accessing the id parameter from the URL
+
+    if(vendorid != req.params.vendorid){
+        return res.redirect("/vendor?popup=Please don't play with this website.");
+    }
     // console.log(req.file)
     try {
         // Find the vendor by ID
-        const vendorUser = await vendor.findById(id);
+        const vendorUser = await vendor.findById(vendorid);
         if (!vendorUser) {
-            return res.status(404).json({ error: 'Vendor not found' });
+            return res.redirect("/vendor?popup=Please login again after logout.");
         }
 
         // Create new item for the vendor
@@ -323,16 +350,17 @@ router.post('/updateStatus/:itemId', async (req, res) => {
     try {
         // Find the item by ID and update its status
         const updatedItem = await items.findByIdAndUpdate(itemId, { status: status }, { new: true });
+        // const updatedItem = await items.updateOne({_id:itemId},{$set:{status:status}}); // this is also correct
 
         if (!updatedItem) {
             return res.status(404).json({ error: 'Item not found' });
         }
 
         // Return the updated item
-        res.json(updatedItem);
+        return res.json(updatedItem);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error' });
     }
 });
 
