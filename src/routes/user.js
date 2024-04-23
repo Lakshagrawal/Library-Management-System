@@ -8,6 +8,16 @@ const cookieParser = require("cookie-parser")
 const verifUser = require("../middleware/verifyUser")
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer")
+const { validationResult } = require('express-validator');
+const rateLimit = require('express-rate-limit');
+const bcrypt = require('bcrypt');
+
+// Rate limiting middleware
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // limit each IP to 10 requests per windowMs
+    message: "Too many requests from this IP, please try again later."
+});
 
 // use of json file in the router or || app file 
 router.use(express.json());
@@ -25,107 +35,125 @@ router.use(bodyParser.urlencoded({
 router.get("/", async (req, res) => {
     const token = await req.cookies.usertoken;
     const message = req.query.message;
+    const popup = req.query.popup;
 
     if (!token) {
-        res.render("user/userlogin",{message});
+        res.render("user/userlogin", { message, popup });
     }
     else {
         const verifyUser = await jwt.verify(token, process.env.SECRET_KEY_TOKEN)
-        res.render('user/userhome', { id: verifyUser._id, message});
+        res.render('user/userhome', { id: verifyUser._id, message, popup });
     }
 })
 router.get("/registration", async (req, res) => {
     const error = req.query.error;
-    res.render('user/usersign', { error: error });
+    const popup = req.query.popup;
+    const message = req.query.message;
+    res.render('user/usersign', { error: error, popup, message });
 })
 
 // for send mail
-const sendVerifyMail = async(name,email,user_id)=>{
+const sendVerifyMail = async (name, email, user_id) => {
     try {
         const transporter = nodemailer.createTransport({
-            host:"smtp.gmail.com",
+            host: "smtp.gmail.com",
             port: 587,
-            secure:false,
-            requireTLS:true,
-            auth:{
-                user:"lakagrawal144@gmail.com",
+            secure: false,
+            requireTLS: true,
+            auth: {
+                user: "lakagrawal144@gmail.com",
                 pass: process.env.GMAIL_KEY_SMTP
             }
         });
 
         const mailOptions = {
-            from:"lakagrawal144@gmail.com",
-            to:email,
-            subject:"Here's your verification link for User Registraion",
-            html:"<p> Hii " + name + `, Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/user/verify?id=`+user_id+'">  Verify </a> your mail.</p>'
+            from: "lakagrawal144@gmail.com",
+            to: email,
+            subject: "Here's your verification link for User Registration",
+            html: `<p> Hii ${name},</p> <br> <p>Please click here to <a href= "http://${process.env.WEBSITE_DOMAIN_NAME}/user/verify?id=${user_id}">  Verify </a> your mail.</p> <br> <p>Regards,</p> <p>Lakshya Agrawal</p>`
         }
 
-        transporter.sendMail(mailOptions,function(error,info){
-            if(error){
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
                 console.log(error);
             }
-            else{
+            else {
                 console.log("Email has been send :-", info.response);
             }
         })
     } catch (error) {
         console.log(error)
     }
-} 
+}
 
 // singup
-router.post("/usersignup", async (req, res) => {
+router.post("/usersignup", limiter, async (req, res) => {
     // console.log(req.body);
-    const { email, pass, user } = req.body;
-    const expireDate = new Date();
-    // user is registre for now 6th months
-    expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
+    try {
+        // Input validation
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        const { email, pass, user } = req.body;
+        const expireDate = new Date();
+        // user is registre for now 6th months
+        expireDate.setMonth(expireDate.getMonth() + 6); // Add 6 months
 
-    // console.log(req.body);
+        // console.log(req.body);
 
-    if (!email || !pass || !user) {
-        // console.log("hello")
-        res.redirect("/user/registration?error=MissingFields")
-        // res.redirect("/user/registration?error=collegeEmailId")
-    }
-    else {
-        try {
+        if (!email || !pass || !user) {
+            // console.log("hello")
+            res.redirect("/user/registration?popup=Please fill in all the fields")
+            // res.redirect("/user/registration?error=collegeEmailId")
+        }
+        else {
+
             const usersdb = await User.findOne({ user: user });
             // console.log(usersdb)
             if (usersdb) {
-                return res.redirect("/user/registration?error=UsernameTaken");
+                return res.redirect("/user/registration?popup=Username is already taken. Please choose another one");
             }
+            // Check if email ends with "@iitp.ac.in"
+            if (!email.endsWith("@iitp.ac.in")) {
+                return res.redirect("/user/registration?popup=Only IITP email addresses are allowed for registration.");
+            }
+
+            // Hash password
+            const hashedPassword = await bcrypt.hash(pass, 10);
+
             const newUser = new User({
                 email,
-                pass,
+                pass: hashedPassword,
                 user,
                 expireDate,
-                is_verfied:0,
-
+                is_verfied: 0,
+                is_admin: 1
             });
             const userData = await newUser.save();
             // console.log(userData)
-            sendVerifyMail(req.body.user,req.body.email,userData._id)
+            sendVerifyMail(req.body.user, req.body.email, userData._id)
 
-            return res.redirect('/user/')
+            return res.redirect('/user?popup=Please check your email inbox/junk')
         }
-        catch (err) {
-            console.log(err);
-            res.status(501).send("server error")
-        }
+    }
+    catch (err) {
+        console.log(err);
+        res.status(501).send("server error")
     }
 })
 
-const verifyMail = async(req,res)=>{
+
+const verifyMail = async (req, res) => {
     try {
-        const updateInfo = await User.updateOne({_id:req.query.id},{$set:{is_verfied:1}});
+        const updateInfo = await User.updateOne({ _id: req.query.id }, { $set: { is_verfied: 1 } });
         // console.log(updateInfo);
-        return res.redirect("/user/")
+        return res.redirect("/user")
     } catch (error) {
         console.log(error)
     }
 }
-router.get("/verify",verifyMail);
+router.get("/verify", verifyMail);
 
 
 //new route for categories 
@@ -140,26 +168,32 @@ router.get("/categories", async (req, res) => {
     res.render("user/usercategories", { vendordata: vendordata, categorie: "All Vendor" })
 })
 
-router.get("/allItems/:id", verifUser, async (req, res) => {
-    const id = req.params.id; // Accessing the id parameter from the URL
-    const vendorUser = await vendor.findOne({ _id: id });
-    if (!vendorUser) {
-        return res.status(404).json({ error: 'Vendor not found' });
+router.get("/allItems/:vendorid", verifUser, async (req, res) => {
+    try {
+        const vendorid = req.params.vendorid; // Accessing the id parameter from the URL
+        const vendorUser = await vendor.findOne({ _id: vendorid });
+
+        if (!vendorUser) {
+            return res.redirect('/user?popup=Vendor not found')
+            // return res.status(404).json({ error: 'Vendor not found' });
+        }
+
+        // Extract items from the vendor
+        let category = vendorUser.category;
+        const allItems = vendorUser.items.map(item => ({
+            itemname: item.itemname,
+            price: item.price,
+            img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}`, // Convert binary data to base64 data URI
+            _id: item._id,
+            vendorid: vendorid
+        }));
+
+        // console.log(category)
+        res.render("user/userAllItems", { items: allItems, category: category })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-    // const allitems = vendorUser.items;
-    // Extract items from the vendor
-    let category = vendorUser.category;
-    const allItems = vendorUser.items.map(item => ({
-        itemname: item.itemname,
-        price: item.price,
-        img: `data:${item.img.contentType};base64,${item.img.data.toString('base64')}`, // Convert binary data to base64 data URI
-        _id: item._id,
-        data: id
-    }));
-
-
-    // console.log(category)
-    res.render("user/userAllItems", { items: allItems, category: category })
 })
 
 
@@ -176,7 +210,8 @@ router.get("/userCart", verifUser, async (req, res) => {
         // console.log(vendorUser)
         // console.log(id)
         if (!vendorUser) {
-            return res.status(404).json({ error: 'Vendor not found' });
+            return res.redirect('/user?popup=Vendor not found')
+            // return res.status(404).json({ error: 'Vendor not found' });
         }
 
         // Extracting items along with their IDs
@@ -205,27 +240,35 @@ router.get("/userCart", verifUser, async (req, res) => {
 
 // /user/usersignin
 // login
-router.post("/usersignin", async (req, res) => {
+router.post("/usersignin", limiter, async (req, res) => {
     // console.log(req.body);
     const { pass, user } = req.body;
 
     if (!user || !pass) {
-        res.redirect("/user")
+        return res.redirect("/user?popup=Please fill in all the fields")
     }
     else {
         try {
             const { user, pass } = req.body;
+
             const usersdb = await User.findOne({ user: user });
             if (!usersdb) {
-                return res.status(404).json({ error: "Please Enter Correct User and Password", "server": "ok" });
+                return res.redirect('/user?popup=Please Enter Correct User and Password')
             }
 
-            if (pass == usersdb.pass) {
+            const isPasswordValid = await bcrypt.compare(pass, usersdb.pass);
+            if(!isPasswordValid) {
+                return res.redirect('/user?popup=Please Enter Correct User and Password');
+            }
+            else{
                 try {
-                    if(usersdb.is_verfied === 0){
+                    if (usersdb.is_verfied === 0) {
                         return res.redirect("/user?message=Please Verify User on Mail First.")
                     }
-                    else{
+                    else if(usersdb.is_admin === 0){
+                        return res.redirect("/user?popup=You have been blocked by Admin.")
+                    }
+                    else {
                         // this ==> User   value
                         const token = jwt.sign({ _id: usersdb._id }, process.env.SECRET_KEY_TOKEN);
                         // console.log("lakshya" , token);
@@ -238,10 +281,6 @@ router.post("/usersignin", async (req, res) => {
                 } catch (error) {
                     console.log("the error part" + error);
                 }
-            }
-            else {
-                // Incorect user and password
-                return res.status(400).json({ error: "Invalid Crediantial", server: "ok" });
             }
         }
         catch (err) {
@@ -265,19 +304,19 @@ router.get("/cart", verifUser, async (req, res) => {
 
         // Check if there is already a cart for the user
         let userCart = await cart.findOne({ user: verifyUser._id });
-        
+
         // Check if userCart is null (no cart found for the user)
         if (!userCart) {
             // Handle the case when no cart is found
             return res.render("user/userAllCartItem", { Checkout: false, items: [], itemsSize: 0 });
         }
-        
+
         // Get the size (length) of the items array
         let checkout = false;
         let itemsSize = userCart.items.length;
-        if(userCart.items.length >= 1) checkout = true;
+        if (userCart.items.length >= 1) checkout = true;
 
-        return res.render("user/userAllCartItem", { Checkout: checkout, items: userCart.items, itemsSize:itemsSize })
+        return res.render("user/userAllCartItem", { Checkout: checkout, items: userCart.items, itemsSize: itemsSize })
 
     } catch (error) {
         console.error('Error:', error);
@@ -330,7 +369,7 @@ router.get("/usertransection", verifUser, async (req, res) => {
 
 router.post("/usertransection", verifUser, async (req, res) => {
     // console.log(req.body);
-    const {userName, mobileNum,address,city,pincode,paymentMethod,state} = req.body;
+    const { userName, mobileNum, address, city, pincode, paymentMethod, state } = req.body;
 
     try {
         const token = req.cookies.usertoken;
@@ -338,7 +377,7 @@ router.post("/usertransection", verifUser, async (req, res) => {
         // const userdata = await User.findOne({ _id: verifyUser._id });
         if (req.body) {
             // console.log(req.body);
-            const cartData = await cart.findOne({user:verifyUser._id})
+            const cartData = await cart.findOne({ user: verifyUser._id })
             // console.log(verifyUser._id)
             // Iterate over the list of items in req.body and save each item individually
             for (const item of cartData.items) {
@@ -352,14 +391,14 @@ router.post("/usertransection", verifUser, async (req, res) => {
                     },
                     status: "Pending", // Assuming status is always "Pending" for new items
                     vendorid: item.vendorid,
-                    userInfo:{
-                        userName:userName,
-                        mobile:mobileNum,
-                        address:address,
-                        city:city,
-                        pincode:pincode,
-                        paymentMethod:paymentMethod,
-                        state:state,
+                    userInfo: {
+                        userName: userName,
+                        mobile: mobileNum,
+                        address: address,
+                        city: city,
+                        pincode: pincode,
+                        paymentMethod: paymentMethod,
+                        state: state,
                     }
                 });
 
@@ -377,8 +416,8 @@ router.post("/usertransection", verifUser, async (req, res) => {
     }
 });
 
-
-router.get("/successpayment",verifUser, async (req, res) => {
+// if you want to integreate razorpay you have to add it here
+router.get("/successpayment", verifUser, async (req, res) => {
     const token = req.cookies.usertoken;
     const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
 
@@ -391,7 +430,7 @@ router.get("/successpayment",verifUser, async (req, res) => {
 })
 
 // Cart logic
-// Route for adding items to the cart
+// Route for adding items to the cart schema
 router.post("/userAddtoCart", verifUser, async (req, res) => {
     // console.log(req.body)
     try {
@@ -403,7 +442,7 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
 
             // Check if there is already a cart for the user
             let userCart = await cart.findOne({ user: verifyUser._id });
-
+            
             if (!userCart) {
                 // If no cart exists, create a new cart entry
                 userCart = await new cart({
@@ -441,8 +480,8 @@ router.post("/userAddtoCart", verifUser, async (req, res) => {
             // console.log(userCart)
 
             // Save the updated/created cart to the database
-            const userCartData  = await userCart.save();
-
+            const userCartData = await userCart.save();
+            
             return res.status(200).json({ message: 'Item(s) added to the cart successfully' });
         } else {
             throw new Error('Request body is missing or invalid');
@@ -467,7 +506,7 @@ router.get("/removeCartitem", verifUser, async (req, res) => {
             userCart.items = userCart.items.filter(item => item.itemid !== itemid);
 
             // Save the updated cart
-            await userCart.save();  
+            await userCart.save();
 
             res.redirect("/user/cart")
         } else {

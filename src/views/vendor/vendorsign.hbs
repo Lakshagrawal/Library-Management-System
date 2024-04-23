@@ -59,6 +59,16 @@
         </div>
     </nav>
 
+    {{!-- Popup --}}
+    {{#if popup}}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="text-center">
+                {{popup}}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {{/if}}
+    
     <!-- Vendor Registration Form -->
     <div class="container">
         <div class="card">

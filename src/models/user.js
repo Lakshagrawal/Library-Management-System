@@ -10,7 +10,8 @@ const User = new mongoose.Schema({
     pass:{type:String,required:true},
     token:{type:String},
     expireDate: {type:Date},
-    is_verfied:{type:Number}
+    is_verfied:{type:Number},
+    is_admin:{type:Number}
 })
 
 
