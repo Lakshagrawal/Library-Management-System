@@ -21,7 +21,9 @@ const Vendor = new mongoose.Schema({
     category:{type:String},
     expireDate: {type:Date},
     is_admin:{type:Number},
-    is_verfied:{type:Number,require:true}
+    is_verfied:{type:Number,require:true},
+    resetPasswordToken:{type:String},
+    resetPasswordExpires:{type:Date},
 })
 
 

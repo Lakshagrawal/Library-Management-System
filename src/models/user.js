@@ -11,7 +11,9 @@ const User = new mongoose.Schema({
     token:{type:String},
     expireDate: {type:Date},
     is_verfied:{type:Number},
-    is_admin:{type:Number}
+    is_admin:{type:Number},
+    resetPasswordToken:{type:String},
+    resetPasswordExpires:{type:Date},
 })
 
 
