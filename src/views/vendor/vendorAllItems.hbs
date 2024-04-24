@@ -17,8 +17,13 @@
       <a href="/vendor/logout" class="btn btn-primary btn-lg btn-block mb-3">Logout</a>
     </div>
   </div>
+
   <div class="container mt-4">
     <h1 class="mb-4">Vendor All Items</h1>
+  </div>
+
+  <div class="container mt-4">
+    {{#if items}}
     <div class="row">
       {{#each items}}
       <div class="col-md-4">
@@ -36,6 +41,9 @@
       </div>
 
       {{/each}}
+      {{else}}
+        <h2 class="text-center text-warning">No Items Posted</h2>
+      {{/if}}
 
     </div>
   </div>

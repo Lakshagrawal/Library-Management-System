@@ -15,7 +15,7 @@ const bcrypt = require('bcrypt');
 // Rate limiting middleware
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // limit each IP to 10 requests per windowMs
+    max: 5, // limit each IP to 10 requests per windowMs
     message: "Too many requests from this IP, please try again later."
 });
 
@@ -365,12 +365,26 @@ router.get("/userorderstatus", verifUser, async (req, res) => {
 
 
 
-router.get("/usertransection", verifUser, async (req, res) => {
-    res.render("user/usertransection")
+router.get("/usertransection", limiter, verifUser, async (req, res) => {
+    try {
+        const token = req.cookies.usertoken;
+        const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
+        const cartData = await cart.findOne({ user: verifyUser._id })
+        // console.log(cartData.items)
+        let size = Array.isArray(cartData.items) ? cartData.items.length : 0;
+        if(size === 0){
+            return res.redirect("/user?popup=You can't place an order because the cart is empty. To place order click *All Vendor*")
+        }
+
+        return res.render("user/usertransection")
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 
 })
 
-router.post("/usertransection", verifUser, async (req, res) => {
+router.post("/usertransection",limiter, verifUser, async (req, res) => {
     // console.log(req.body);
     const { userName, mobileNum, address, city, pincode, paymentMethod, state } = req.body;
 
@@ -636,10 +650,10 @@ router.post("/resetpassword/:token", async (req, res) => {
         userData.pass = hashedPassword;
         userData.resetPasswordToken = undefined;
         userData.resetPasswordExpires = undefined;
-        
+
         await userData.save();
 
-        return res.redirect("/user?popupSuccess=Password reset successfully. Now login")
+        return res.redirect("/user?popupSuccess=Password reset successfully. Login")
         // return res.status(200).json({ message: "Password reset successfully" });
     } catch (error) {
         console.log(error);
