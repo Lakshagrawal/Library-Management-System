@@ -26,6 +26,7 @@
     <h2 class="text-center">User Order Status</h2>
 
     <div class="table-responsive">
+      {{#if items}}
       <table class="table table-bordered">
         <thead>
           <tr>
@@ -46,6 +47,9 @@
           {{/each}}
         </tbody>
       </table>
+      {{else}}
+        <h2 class="text-center text-warning">No orders have been placed.</h2>
+      {{/if}}
     </div>
 
   </div>
