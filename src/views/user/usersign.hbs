@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Registration User</title>
+
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <style>
+        /* Hover effect */
+        .nav-link:hover {
+            color: #fff; /* White text color on hover */
+            background-color: #35c3cd; /* Darker shade of primary color on hover */
+            border-color: #0b5ed7; /* Darker shade of primary color on hover */
+            border-radius: 1rem;
+        }
+    </style>
+    
+    <!-- mobile specific metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body id="top">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">Buy and Sell System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-start" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-center" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-center" href="/user">login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    {{!-- Popup --}}
+    {{#if popup}}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="text-center">
+                {{popup}}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {{/if}}
+    
+    {{#if error}}
+        {{#if (eq error 'MissingFields')}}
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Please fill in all the fields.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {{else if (eq error 'UsernameTaken')}}
+        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">Username is already taken. Please choose another one.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {{/if}}
+    {{/if}}
+
+    <!-- Registration Form -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card shadow p-3 mb-5 bg-white rounded">
+                    <div class="card-body">
+                        <h1 class="card-title text-center mb-4">User Registration</h1>
+                        <form id="registrationForm" action="/user/usersignup" method="post">
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">User Name</label>
+                                <input type="text" class="form-control" name="user" id="userId" aria-describedby="userIdHelp" required>
+                                <div id="userIdHelp" class="form-text">Enter your user name.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email address</label>
+                                <input type="email" name="email" id="email" class="form-control" aria-describedby="emailHelp" required>
+                                <div id="emailHelp" class="form-text text-danger">Use college email id only</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" name="pass" id="password" class="form-control" required>
+                            </div>
+                            <button id="submitButton" type="submit" class="btn btn-primary" disabled>Submit</button>
+                        </form>
+                        <div class="mt-3 text-center">
+                            <div id="emailHelp" class="form-text text-danger">To verify check email in junk/spam</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#email').on('input', function () {
+                var email = $(this).val();
+                if (email.endsWith('@iitp.ac.in')) {
+                    $('#submitButton').prop('disabled', false);
+                } else {
+                    $('#submitButton').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

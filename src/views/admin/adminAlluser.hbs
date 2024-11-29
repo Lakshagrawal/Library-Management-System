@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>All the User</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <a class="btn btn-primary" href="/admin/maintainUser">Back</a>
+        <a class="btn btn-primary" href="/admin/logout">Logout</a>
+        <h1 class="container text-center ">
+            All the Users
+        </h1>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            {{#each users}}
+            <div class="col-4">
+                <form action="/admin/updateUser/{{this._id}}" method="post">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">{{this.user}}</h5>
+
+                            <!-- Username -->
+                            <div class="form-group">
+                                <label for="username{{@index}}">Username:</label>
+                                <small class="text-center">{{this._id}}</small>
+                                <input type="text" class="form-control" id="username{{@index}}" name="username"
+                                    placeholder="Enter username" value="{{this.user}}">
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email{{@index}}">Email:</label>
+                                <input type="email" class="form-control" id="email{{@index}}" name="email"
+                                    placeholder="Enter email" value="{{this.email}}">
+                            </div>
+
+                            <!-- Date -->
+                            <div class="form-group">
+                                <label for="date{{@index}}">Membership Date:</label>
+                                <input type="date" class="form-control" id="date{{@index}}"
+                                    name="membershipDate{{@index}}" value="{{#if this.expireDate}}{{formatDate this.expireDate}}{{else}}2024-04-11{{/if}}" data-date-format="mm/dd/yyyy">
+                            </div>
+
+                            <!-- Card content -->
+                            <p class="card-text">You can edit all the fields by clicking <strong>Update</strong> or
+                                delete by clicking <strong>Delete</strong></p>
+                            <a href="/admin/deleteUser/{{this.id}}" class="btn btn-danger">Delete</a>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {{/each}}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

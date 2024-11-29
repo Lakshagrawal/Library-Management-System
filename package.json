@@ -1,0 +1,35 @@
+{
+  "name": "fte-placement",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./src/app.js -e hbs,js,json"
+  },
+  "author": "Lakshya Agrawal",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "body-parser": "1.20.2",
+    "cookie-parser": "1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "4.18.2",
+    "express-handlebars": "^7.1.2",
+    "express-rate-limit": "^7.2.0",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.0.1",
+    "hbs": "4.2.0",
+    "jsonwebtoken": "9.0.1",
+    "mongoose": "7.3.4",
+    "multer": "^1.4.5-lts.1",
+    "node": "20.5.0",
+    "nodemailer": "^6.9.13",
+    "nodemon": "3.0.1",
+    "parse-bytes": "^0.0.2",
+    "pm2": "5.3.0",
+    "url": "^0.11.3"
+  }
+}

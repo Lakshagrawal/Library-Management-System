@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!-- Created By CodingLab - www.codinglabweb.com -->
+<html lang="en" class="no-js">
+
+<head>
+  <meta charset="UTF-8">
+  <title> Admin Login Page </title>
+  <script src="/static/js/modernizr.js"></script>
+
+  <link rel="stylesheet" href="/static/css/style1.css">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- mobile specific metas
+  ================================================== -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS
+  ================================================== -->
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+
+  <!-- script
+  ================================================== -->
+  <script src="/static/js/modernizr.js"></script>
+  <script defer src="/static/js/fontawesome/all.min.js"></script>
+
+
+</head>
+
+<body id="top">
+
+  <!-- preloader
+    ================================================== -->
+  <div id="preloader">
+    <div id="loader" class="dots-fade">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+  {{#if samepassworderror}}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>User Already Exists</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {{/if}}
+
+
+  <!-- Header
+    ================================================== -->
+  <header class="s-header">
+
+
+    <nav class="s-header__nav-wrap">
+
+      <div class="row">
+
+        <ul class="s-header__nav">
+          <li><a href="/">Home</a></li>
+          <li><a href="/admin/registration">Sign Up</a></li>
+
+        </ul> <!-- end #nav -->
+      </div>
+
+    </nav> <!-- end #nav-wrap -->
+
+    <a class="header-menu-toggle" href="#0" title="Menu"><span>Menu</span></a>
+
+  </header> <!-- Header End -->
+  <div class="container">
+    <form action="/admin/adminsignin" method="post">
+      <div class="title">Admin Login</div>
+      <span class="details">Admin User Name</span>
+      <div class="input-box underline">
+        <input type="text" placeholder="Enter Your User Id" name="user" class="user" id="user" required>
+        <div class="underline"></div>
+      </div>
+      <span class="details">Password</span>
+      <div class="input-box">
+        <input type="password" placeholder="Enter Your Password" name="pass" id="pass" class="pass" required>
+        <div class="underline"></div>
+      </div>
+      <div class="input-box button">
+        <input type="submit" name="" value="Continue">
+      </div>
+    </form>
+  </div>
+
+
+  <script src="/static/js/jquery-3.2.1.min.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+
+</html>

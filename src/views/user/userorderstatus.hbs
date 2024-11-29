@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Order Status</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+
+  <div class="container mt-4">
+    <div class="row">
+     <div class="col d-flex justify-content-between">
+            <div>
+                <a href="/user" class="btn btn-primary btn-lg mb-3">Back</a>
+            </div>
+            <div>
+                <a href="/user/logout" class="btn btn-primary btn-lg mb-3">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="text-center">User Order Status</h2>
+
+    <div class="table-responsive">
+      {{#if items}}
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Your Bid</th>
+            <th>Order Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each items}}
+          <tr>
+            <td>{{this.items.name}}</td>
+            <td>{{this.items.quantity}}</td>
+            <td>₹ {{this.items.total}}</td>
+            <td>{{this.status}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{else}}
+        <h2 class="text-center text-warning">No orders have been placed.</h2>
+      {{/if}}
+    </div>
+
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
