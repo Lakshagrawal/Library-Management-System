@@ -90,7 +90,7 @@ const sendVerifyMail = async (name, email, user_id) => {
 }
 
 // singup
-router.post("/usersignup", limiter, async (req, res) => {
+router.post("/usersignup", async (req, res) => {
     // console.log(req.body);
     try {
         // Input validation
@@ -243,7 +243,7 @@ router.get("/userCart", verifUser, async (req, res) => {
 
 // /user/usersignin
 // login
-router.post("/usersignin", limiter, async (req, res) => {
+router.post("/usersignin", async (req, res) => {
     // console.log(req.body);
     const { pass, user } = req.body;
 
@@ -365,7 +365,7 @@ router.get("/userorderstatus", verifUser, async (req, res) => {
 
 
 
-router.get("/usertransection", limiter, verifUser, async (req, res) => {
+router.get("/usertransection", verifUser, async (req, res) => {
     try {
         const token = req.cookies.usertoken;
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
@@ -384,7 +384,7 @@ router.get("/usertransection", limiter, verifUser, async (req, res) => {
 
 })
 
-router.post("/usertransection",limiter, verifUser, async (req, res) => {
+router.post("/usertransection", verifUser, async (req, res) => {
     // console.log(req.body);
     const { userName, mobileNum, address, city, pincode, paymentMethod, state } = req.body;
 
